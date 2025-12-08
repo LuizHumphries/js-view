@@ -13,13 +13,15 @@ export default function TodoList() {
         setTitle('')
     }
     return (
-        <div>
+        <div className="bg-amber-400">
             <h2>Todo List</h2>
 
             <div>
                 <input
                     value={title}
-                    onChange={(event) => { setTitle(event.target.value); }}
+                    onChange={(event) => {
+                        setTitle(event.target.value)
+                    }}
                     placeholder="New todo"
                 />
                 <button onClick={handleAdd}>Add</button>
