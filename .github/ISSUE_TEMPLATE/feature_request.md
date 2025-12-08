@@ -1,24 +1,23 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
-title: ''
-labels: ''
-assignees: LuizHumphries
-
+name: "Feature / Task"
+about: "Nova funcionalidade ou tarefa de desenvolvimento"
+title: ""
+labels: ["feature"]
+assignees: ["LuizHumphries"]
 ---
 
-## Context
+## Contexto
 
-Context explanation [2 to 3 rows max]
+Explique rapidamente o porquê dessa tarefa existir.
+Exemplo: "Adicionar o BlockPalette para que o usuário possa montar o programa visualmente."
 
-## Tasks
+## Tarefas
 
-- [ ] Task 1
-- [ ] Task 2
-- [ ] Task 3
+- [ ] Tarefa 1
+- [ ] Tarefa 2
+- [ ] Tarefa 3
 
-## Acceptable  Criteria
+## Critérios de aceite
 
-- [ ] Criteria 1
-- [ ] Criteria 2
-- [ ] Criteria 3
+- [ ] O que precisa estar funcionando para considerar essa issue concluída
+- [ ] Outro critério importante
