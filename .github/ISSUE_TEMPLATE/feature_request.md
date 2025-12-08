@@ -1,9 +1,9 @@
 ---
-name: "Feature / Task"
-about: "Nova funcionalidade ou tarefa de desenvolvimento"
-title: ""
-labels: ["feature"]
-assignees: ["LuizHumphries"]
+name: 'Feature / Task'
+about: 'Nova funcionalidade ou tarefa de desenvolvimento'
+title: ''
+labels: ['feature']
+assignees: ['LuizHumphries']
 ---
 
 ## Contexto
