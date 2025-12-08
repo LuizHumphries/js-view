@@ -1,5 +1,8 @@
-function App() {
-    return <div>Project</div>
-}
+import TodoList from './features/todos/TodoList'
 
-export default App
+export const App = () => (
+    <div className="App">
+        testando
+        <TodoList />
+    </div>
+)
