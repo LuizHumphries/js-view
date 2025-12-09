@@ -1,10 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { todoReducer } from '../features/todos/todoSlice'
+import { blocksReducer } from '../features/blocks/blocksSlice'
+import { programReducer } from '../features/program/programSlice'
 
 export const store = configureStore({
     reducer: {
-        todos: todoReducer,
-        // program: programReducer,
+        blocks: blocksReducer,
+        program: programReducer,
         // blocks: blocksReducer,
         // simulation: simulationReducer,
         // ...
