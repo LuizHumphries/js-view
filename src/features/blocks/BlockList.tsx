@@ -9,7 +9,7 @@ export default function BlockList() {
             <div className="flex flex-col gap-4">
                 {blocks.map((block) => {
                     return (
-                        <div className="flex w-96 flex-row gap-2 rounded-2xl border border-amber-500 p-4">
+                        <div key={block.id} className="flex w-96 flex-row gap-2 rounded-2xl border border-amber-500 p-4">
                             <span className="flex w-24 items-center justify-center rounded-full bg-amber-700 p-2 text-white">
                                 {block.category}
                             </span>
