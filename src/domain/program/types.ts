@@ -1,6 +1,6 @@
-import { BlockType } from '../blocks/types'
+import type { BlockType } from '../blocks/types'
 
-export interface ProgramBlockInstance {
+export type ProgramBlockInstance = {
     instanceId: string
     blockId: BlockType
 }

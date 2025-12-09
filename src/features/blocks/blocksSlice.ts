@@ -1,7 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { BlockDefinition } from '../../domain/blocks/types'
+import type { BlockDefinition } from '../../domain/blocks/types'
+import type { RootState } from '../../store'
 
-export interface BlocksState {
+export type BlocksState = {
     available: BlockDefinition[]
 }
 
@@ -68,3 +69,5 @@ export const blocksSlice = createSlice({
 })
 
 export const blocksReducer = blocksSlice.reducer
+
+export const selectBlockDefinitions = (state: RootState) => state.blocks.available

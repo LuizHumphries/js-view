@@ -1,7 +1,7 @@
 export type BlockType = 'console' | 'promiseThen' | 'asyncAwait' | 'timeout' | 'forLoop'
 export type BlockCategory = 'sync' | 'microtask' | 'macrotask' | 'loop'
 
-export interface BlockDefinition {
+export type BlockDefinition = {
     id: BlockType
     type: BlockType
     title: string

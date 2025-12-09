@@ -1,20 +1,27 @@
-import { useAppSelector } from '../../store/hooks'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { addProgramBlock } from '../program/programSlice'
+import { selectBlockDefinitions } from './blocksSlice'
 
 export default function BlockList() {
-    const blocks = useAppSelector((state) => state.blocks.available)
+    const blocks = useAppSelector(selectBlockDefinitions)
+    const dispatch = useAppDispatch()
 
-    console.log(blocks)
     return (
         <section className="p-4">
             <div className="flex flex-col gap-4">
                 {blocks.map((block) => {
                     return (
-                        <div key={block.id} className="flex w-96 flex-row gap-2 rounded-2xl border border-amber-500 p-4">
+                        <button
+                            key={block.id}
+                            onClick={() => dispatch(addProgramBlock(block.id))}
+                            title={block.description}
+                            className="flex w-96 flex-row items-center gap-2 rounded-2xl border border-amber-500 p-4"
+                        >
                             <span className="flex w-24 items-center justify-center rounded-full bg-amber-700 p-2 text-white">
                                 {block.category}
                             </span>
-                            <button title={block.description}>{block.title}</button>
-                        </div>
+                            <span>{block.title}</span>
+                        </button>
                     )
                 })}
             </div>
