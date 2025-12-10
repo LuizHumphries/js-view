@@ -13,14 +13,14 @@ export default function GeneratedCodePanel() {
     const code = generateProgramCode(instances, definitions)
 
     return (
-        <section className="flex flex-col">
+        <section className="flex h-full flex-col">
             <div className="flex flex-row items-center gap-2 rounded-t-xl bg-bg-block-hover px-5 py-1">
                 <h2 className="font-bold tracking-wide text-text-primary uppercase">
                     Generated Code
                 </h2>
                 <span className="text-sm tracking-wide text-text-muted uppercase">(Read only)</span>
             </div>
-            <div className="program-scroll h-95 w-full overflow-y-auto scroll-smooth bg-bg-block">
+            <div className="program-scroll h-96 w-full overflow-y-auto scroll-smooth rounded-b-xl bg-bg-block [scrollbar-gutter:stable]">
                 <SyntaxHighlighter
                     language="javascript"
                     showLineNumbers

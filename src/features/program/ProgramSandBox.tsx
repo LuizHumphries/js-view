@@ -6,6 +6,7 @@ import {
 } from './programSlice'
 import type { DragEndEvent } from '@dnd-kit/core'
 import { DndContext } from '@dnd-kit/core'
+import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifiers'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import SortableProgramBlock from './SortableProgramBlock'
 
@@ -36,8 +37,11 @@ export default function ProgramSandBox() {
                     (Drag to Reorder)
                 </span>
             </div>
-            <div className="program-scroll h-96 w-full overflow-y-auto scroll-smooth rounded-b-xl bg-bg-block">
-                <DndContext onDragEnd={handleDragEnd}>
+            <div className="program-scroll h-96 w-full touch-pan-y overflow-y-auto scroll-smooth rounded-b-xl bg-bg-block [scrollbar-gutter:stable]">
+                <DndContext
+                    onDragEnd={handleDragEnd}
+                    modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+                >
                     <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
                         <div className="flex flex-col items-start gap-4 p-5">
                             {programBlocks.map((block) => {

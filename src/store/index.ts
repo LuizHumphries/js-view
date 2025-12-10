@@ -1,13 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { blocksReducer } from '../features/blocks/blocksSlice'
 import { programReducer } from '../features/program/programSlice'
+import { simulationReducer } from '../features/simulation/simulationSlice'
 
 export const store = configureStore({
     reducer: {
         blocks: blocksReducer,
         program: programReducer,
-        // blocks: blocksReducer,
-        // simulation: simulationReducer,
+        simulation: simulationReducer,
         // ...
     },
 })

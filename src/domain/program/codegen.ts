@@ -1,7 +1,8 @@
 import type { BlockDefinition } from '../blocks/types'
+import { getConsoleMessagesForBlock } from './logmessage'
 import type { ProgramBlockInstance } from './types'
 
-function sequenceToLabel(sequence: number): string {
+export function sequenceToLabel(sequence: number): string {
     let label = ''
 
     while (sequence >= 0) {
@@ -29,42 +30,48 @@ export function generateProgramCode(
 
     for (const { instance, definition } of blocksWithDef) {
         const label = sequenceToLabel(instance.sequence)
+        const messages = getConsoleMessagesForBlock(instance)
 
         switch (definition.type) {
-            case 'console':
-                lines.push(`console.log("${label}");\n`)
+            case 'console': {
+                const [msg] = messages
+                lines.push(`console.log("${msg}");\n`)
                 break
-            case 'forLoop':
+            }
+            case 'forLoop': {
                 lines.push(
                     `for (let i = 0; i < 2; i++) {`,
-                    `   console.log("For Loop: ${label}");`,
+                    `   console.log(\`For Loop: ${label} \${i}\`);`,
                     `}\n`,
                 )
                 break
-            case 'asyncAwait':
+            }
+            case 'asyncAwait': {
+                const [preMsg, postMsg] = messages
                 lines.push(
                     `async function run${label}() {`,
-                    `  console.log("PRE await ${label}");`,
+                    `  console.log("${preMsg}");`,
                     `  await someFunction${label}();`,
-                    `  console.log("POST await ${label}");`,
+                    `  console.log("${postMsg}");`,
                     `}\n`,
                     `run${label}();\n`,
                 )
                 break
-            case 'promiseThen':
+            }
+            case 'promiseThen': {
+                const [msg] = messages
                 lines.push(
                     `Promise.resolve("_").then(() => {`,
-                    `   console.log("Promise ${label}");`,
+                    `   console.log("${msg}");`,
                     `});\n`,
                 )
                 break
-            case 'timeout':
-                lines.push(
-                    `setTimeout(() => {`,
-                    `   console.log("setTimeout ${label}");`,
-                    ` }, 1);\n`,
-                )
+            }
+            case 'timeout': {
+                const [msg] = messages
+                lines.push(`setTimeout(() => {`, `   console.log("${msg}");`, ` }, 1);\n`)
                 break
+            }
         }
     }
     return lines.join('\n')

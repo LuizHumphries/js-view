@@ -5,7 +5,7 @@ import { LucideTrash2 } from 'lucide-react'
 import Block from '../../components/block/Block'
 import { cn } from '../../utils/cn'
 
-type SortableProgramBlockProps = {
+export type SortableProgramBlockProps = {
     instanceId: string
     definition: BlockDefinition
     onRemove: () => void
@@ -27,7 +27,11 @@ export default function SortableProgramBlock({
     }
 
     return (
-        <div ref={setNodeRef} className={cn('flex flex-row items-center gap-4')} style={style}>
+        <div
+            ref={setNodeRef}
+            className={cn('flex w-full flex-row items-center gap-4')}
+            style={style}
+        >
             <div className="flex-1" {...attributes} {...listeners}>
                 <Block hasIconBg={false} definition={definition} hasCodeDefinition={false} />
             </div>

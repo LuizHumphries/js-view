@@ -17,7 +17,7 @@ export default function BlockList() {
                     (Click to select)
                 </span>
             </div>
-            <div className="flex h-full flex-col items-center gap-4 rounded-b-xl bg-bg-block p-5">
+            <div className="flex h-full w-68 flex-col items-center gap-4 rounded-b-xl bg-bg-block p-5">
                 {blocks.map((block) => (
                     <Block
                         onClick={() => dispatch(addProgramBlock(block.id))}
