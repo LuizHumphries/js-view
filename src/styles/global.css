@@ -2,5 +2,60 @@
 
 
 @theme {
-    --font-display: "OpenSans", "sans-serif"
+    --font-display: "OpenSans", "sans-serif";
+
+    --color-bg-app: #050814;
+    --color-bg-panel: #0d1117;
+    --color-bg-block: #111827;
+    --color-bg-block-hover: #1f2937;
+
+    --color-accent-console: #4fd5ff;
+    --color-accent-forLoop: #4fb5ff;
+    --color-accent-timeout: #f8c56a;
+    --color-accent-promiseThen: #b56cff;
+    --color-accent-asyncAwait: #b52cff;
+
+    --color-text-primary: #e5e7eb;
+    --color-text-muted: #9ca3af;
+    --color-border-subtle: #1f2933;
+
+    --shadow-card-soft: 0 8px 20px rgba(0, 0, 0, 0.6);
+    --shadow-glow-console: 0 0 16px rgba(79, 213, 255, 0.5);
+    --shadow-glow-forLoop: 0 0 16px rgba(79, 195, 255, 0.5);
+    --shadow-glow-timeout: 0 0 16px rgba(248, 197, 106, 0.5);
+    --shadow-glow-promiseThen: 0 0 16px rgba(181, 108, 255, 0.5);
+    --shadow-glow-asyncAwait: 0 0 16px rgba(191, 108, 255, 0.5);
 }
+
+html, body, #root {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+}
+
+.program-scroll {
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: #4b5563 #111827; /* thumb, track */
+  }
+
+  .program-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .program-scroll::-webkit-scrollbar-track {
+    background: #111827; /* bg bem escura */
+    border-radius: 9999px;
+  }
+
+  .program-scroll::-webkit-scrollbar-thumb {
+    background: #4b5563; /* cinza intermediário */
+    border-radius: 9999px;
+    border: 2px solid #111827; /* "afina" o thumb */
+  }
+
+  .program-scroll::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+  }

@@ -1,29 +1,30 @@
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { addProgramBlock } from '../program/programSlice'
 import { selectBlockDefinitions } from './blocksSlice'
+import Block from '../../components/block/Block'
 
 export default function BlockList() {
     const blocks = useAppSelector(selectBlockDefinitions)
     const dispatch = useAppDispatch()
 
     return (
-        <section className="p-4">
-            <div className="flex flex-col gap-4">
-                {blocks.map((block) => {
-                    return (
-                        <button
-                            key={block.id}
-                            onClick={() => dispatch(addProgramBlock(block.id))}
-                            title={block.description}
-                            className="flex w-96 flex-row items-center gap-2 rounded-2xl border border-amber-500 p-4"
-                        >
-                            <span className="flex w-24 items-center justify-center rounded-full bg-amber-700 p-2 text-white">
-                                {block.category}
-                            </span>
-                            <span>{block.title}</span>
-                        </button>
-                    )
-                })}
+        <section className="flex flex-col">
+            <div className="flex flex-col items-center gap-2 rounded-t-xl bg-bg-block-hover px-5 py-1 text-center">
+                <h2 className="font-bold tracking-wide text-text-primary uppercase">
+                    Available blocks
+                </h2>
+                <span className="text-sm tracking-wide text-text-muted uppercase">
+                    (Click to select)
+                </span>
+            </div>
+            <div className="flex h-full flex-col items-center gap-4 rounded-b-xl bg-bg-block p-5">
+                {blocks.map((block) => (
+                    <Block
+                        onClick={() => dispatch(addProgramBlock(block.id))}
+                        definition={block}
+                        key={block.id}
+                    />
+                ))}
             </div>
         </section>
     )

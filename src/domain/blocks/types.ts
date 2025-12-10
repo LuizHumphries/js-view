@@ -1,4 +1,4 @@
-export type BlockType = 'console' | 'promiseThen' | 'asyncAwait' | 'timeout' | 'forLoop'
+export type BlockType = 'console' | 'forLoop' | 'promiseThen' | 'asyncAwait' | 'timeout'
 export type BlockCategory = 'sync' | 'microtask' | 'macrotask' | 'loop'
 
 export type BlockDefinition = {

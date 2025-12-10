@@ -50,7 +50,7 @@ const initialState: BlocksState = {
             type: 'asyncAwait',
             title: 'Async Await',
             description:
-                'O Await faz com que a execução seja parada e o que rodaria depois, dentro da função roda só depois que a microtask executa.',
+                'O Await faz com que a execução seja parada e o que rodaria depois, dentro da função, roda só depois que a microtask executa.',
             category: 'microtask',
             complexityLevel: 1,
             exampleCode:
