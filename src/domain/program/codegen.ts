@@ -51,7 +51,7 @@ export function generateProgramCode(
                 lines.push(
                     `async function run${label}() {`,
                     `  console.log("${preMsg}");`,
-                    `  await someFunction${label}();`,
+                    `  await null;`,
                     `  console.log("${postMsg}");`,
                     `}\n`,
                     `run${label}();\n`,
