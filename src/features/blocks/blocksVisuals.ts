@@ -18,31 +18,31 @@ const BLOCK_VISUALS: Record<BlockType, BlockVisual> = {
     console: {
         icon: LucideSquareChevronRight,
         accentBgClass: 'bg-accent-console',
-        borderGradientClass: 'bg-gradient-to-r from-accent-console/80 to-accent-console/40',
+        borderGradientClass: 'bg-gradient-to-r from-accent-console/70 to-accent-console/40',
         glowShadowClass: 'shadow-glow-console',
     },
     forLoop: {
         icon: LucideLayers,
         accentBgClass: 'bg-accent-forLoop',
-        borderGradientClass: 'bg-gradient-to-r from-accent-forLoop/80 to-accent-forLoop/40',
+        borderGradientClass: 'bg-gradient-to-r from-accent-forLoop/70 to-accent-forLoop/40',
         glowShadowClass: 'shadow-glow-forLoop',
     },
     timeout: {
         icon: LucideHourglass,
         accentBgClass: 'bg-accent-timeout',
-        borderGradientClass: 'bg-gradient-to-r from-accent-timeout/80 to-accent-timeout/40',
+        borderGradientClass: 'bg-gradient-to-r from-accent-timeout/70 to-accent-timeout/40',
         glowShadowClass: 'shadow-glow-timeout',
     },
     promiseThen: {
         icon: LucideBox,
         accentBgClass: 'bg-accent-promiseThen',
-        borderGradientClass: 'bg-gradient-to-r from-accent-promiseThen/80 to-accent-promiseThen/40',
+        borderGradientClass: 'bg-gradient-to-r from-accent-promiseThen/70 to-accent-promiseThen/40',
         glowShadowClass: 'shadow-glow-promiseThen',
     },
     asyncAwait: {
         icon: LucideOctagonPause,
         accentBgClass: 'bg-accent-asyncAwait',
-        borderGradientClass: 'bg-gradient-to-r from-accent-asyncAwait/80 to-accent-asyncAwait/40',
+        borderGradientClass: 'bg-gradient-to-r from-accent-asyncAwait/70 to-accent-asyncAwait/40',
         glowShadowClass: 'shadow-glow-asyncAwait',
     },
 }

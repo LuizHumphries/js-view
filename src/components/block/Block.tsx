@@ -42,7 +42,7 @@ export default function Block({
                     >
                         <Icon className="h-4 w-4" />
                     </div>
-                    <span className="text-white">{definition.title}</span>
+                    <span className="text-sm text-white">{definition.title}</span>
                 </div>
                 {hasCodeDefinition && (
                     <code

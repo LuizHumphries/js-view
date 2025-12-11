@@ -116,5 +116,7 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
             runtime.callStack = []
         }
     }
+
+    steps.push(snapshotState(runtime, 'Simulação completa. Todas as filas estão vazias.'))
     return steps
 }

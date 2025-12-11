@@ -19,12 +19,30 @@
     --color-text-muted: #9ca3af;
     --color-border-subtle: #1f2933;
 
-    --shadow-card-soft: 0 8px 20px rgba(0, 0, 0, 0.6);
-    --shadow-glow-console: 0 0 16px rgba(79, 213, 255, 0.5);
-    --shadow-glow-forLoop: 0 0 16px rgba(79, 195, 255, 0.5);
-    --shadow-glow-timeout: 0 0 16px rgba(248, 197, 106, 0.5);
-    --shadow-glow-promiseThen: 0 0 16px rgba(181, 108, 255, 0.5);
-    --shadow-glow-asyncAwait: 0 0 16px rgba(191, 108, 255, 0.5);
+    --shadow-card-soft: 0 8px 20px rgba(0, 0, 0, 0.4);
+    --shadow-glow-console: 0 0 14px rgba(79, 213, 255, 0.4);
+    --shadow-glow-forLoop: 0 0 14px rgba(79, 195, 255, 0.4);
+    --shadow-glow-timeout: 0 0 14px rgba(248, 197, 106, 0.4);
+    --shadow-glow-promiseThen: 0 0 14px rgba(181, 108, 255, 0.4);
+    --shadow-glow-asyncAwait: 0 0 14px rgba(191, 108, 255, 0.4);
+
+    --color-bg-console: #0a0f14;
+    --color-bg-block-strong: #1a2332;
+
+    --color-accent-success: #4ade80;
+    --color-accent-warning: #fbbf24;
+    --color-accent-danger: #f87171;
+
+    --color-zone-callstack: #3b82f6;
+    --color-zone-microtask: #a855f7;
+    --color-zone-macrotask: #f59e0b;
+    --color-zone-webapi: #06b6d4;
+
+    --shadow-glow-success: 0 0 16px rgba(74, 222, 128, 0.5);
+    --shadow-glow-warning: 0 0 16px rgba(251, 191, 36, 0.5);
+    --shadow-glow-danger: 0 0 16px rgba(248, 113, 113, 0.5);
+
+    --gradient-cta: linear-gradient(135deg, #b56cff 0%, #b52cff 100%);
 }
 
 html, body, #root {
@@ -36,26 +54,49 @@ body {
 }
 
 .program-scroll {
-    /* Firefox */
-    scrollbar-width: thin;
-    scrollbar-color: #4b5563 #111827; /* thumb, track */
-  }
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 #111827;
+}
 
-  .program-scroll::-webkit-scrollbar {
-    width: 8px;
-  }
+.program-scroll::-webkit-scrollbar {
+  width: 8px;
+}
 
-  .program-scroll::-webkit-scrollbar-track {
-    background: #111827; /* bg bem escura */
-    border-radius: 9999px;
-  }
+.program-scroll::-webkit-scrollbar-track {
+  background: #111827;
+  border-radius: 9999px;
+}
 
-  .program-scroll::-webkit-scrollbar-thumb {
-    background: #4b5563; /* cinza intermediário */
-    border-radius: 9999px;
-    border: 2px solid #111827; /* "afina" o thumb */
-  }
+.program-scroll::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 9999px;
+  border: 2px solid #111827;
+}
 
-  .program-scroll::-webkit-scrollbar-thumb:hover {
-    background: #6b7280;
+.program-scroll::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+
+@keyframes pulse-subtle {
+  0%, 100% {
+      opacity: 1;
+      box-shadow: 0 4px 12px rgba(181, 108, 255, 0.3);
   }
+  50% {
+      opacity: 0.9;
+      box-shadow: 0 4px 20px rgba(181, 44, 255, 0.5);
+  }
+}
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+}

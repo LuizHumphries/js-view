@@ -28,22 +28,22 @@ export default function ProgramSandBox() {
     }
 
     return (
-        <section className="flex h-full flex-col">
-            <div className="flex flex-row items-center gap-2 rounded-t-xl bg-bg-block-hover px-5 py-1">
+        <section className="flex min-h-0 flex-1 flex-col">
+            <header className="flex flex-row items-center gap-2 rounded-t-xl bg-bg-block-hover px-5 py-1">
                 <h2 className="font-bold tracking-wide text-text-primary uppercase">
                     Execution Thread
                 </h2>
                 <span className="text-sm tracking-wide text-text-muted uppercase">
                     (Drag to Reorder)
                 </span>
-            </div>
-            <div className="program-scroll h-96 w-full touch-pan-y overflow-y-auto scroll-smooth rounded-b-xl bg-bg-block [scrollbar-gutter:stable]">
+            </header>
+            <main className="program-scroll w-full flex-1 touch-pan-y overflow-y-auto scroll-smooth rounded-b-xl bg-bg-block [scrollbar-gutter:stable]">
                 <DndContext
                     onDragEnd={handleDragEnd}
                     modifiers={[restrictToVerticalAxis, restrictToParentElement]}
                 >
                     <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
-                        <div className="flex flex-col items-start gap-4 p-5">
+                        <div className="flex flex-col items-start gap-3 p-5">
                             {programBlocks.map((block) => {
                                 return (
                                     <SortableProgramBlock
@@ -59,7 +59,7 @@ export default function ProgramSandBox() {
                         </div>
                     </SortableContext>
                 </DndContext>
-            </div>
+            </main>
         </section>
     )
 }

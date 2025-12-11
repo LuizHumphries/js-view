@@ -5,10 +5,10 @@ import SimulationVisualizer from './features/simulation/SimulationVisualizer'
 import './styles/global.css'
 
 export const App = () => (
-    <div className="flex min-h-screen w-screen bg-bg-app p-4">
-        <div className="flex w-full flex-row gap-4 rounded-2xl border border-accent-promiseThen bg-bg-app p-4">
+    <div className="flex h-screen w-screen overflow-hidden bg-bg-app p-4">
+        <div className="flex h-full w-full flex-row gap-4 rounded-2xl border border-accent-promiseThen bg-bg-app p-4">
             <BlockList />
-            <div className="flex w-92 flex-col justify-between gap-4">
+            <div className="flex h-full w-92 flex-col gap-4">
                 <ProgramSandBox />
                 <GeneratedCodePanel />
             </div>
