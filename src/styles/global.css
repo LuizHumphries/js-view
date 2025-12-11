@@ -1,102 +1,152 @@
 @import "tailwindcss";
 
-
 @theme {
-    --font-display: "OpenSans", "sans-serif";
+  --font-display: "OpenSans", "sans-serif";
 
-    --color-bg-app: #050814;
-    --color-bg-panel: #0d1117;
-    --color-bg-block: #111827;
-    --color-bg-block-hover: #1f2937;
+  --color-bg-app: hsl(40, 20%, 5%);
+  --color-bg-panel: hsl(40, 18%, 8%);
+  --color-bg-block: hsl(40, 16%, 12%);
+  --color-bg-block-hover: hsl(40, 18%, 16%);
 
-    --color-accent-console: #4fd5ff;
-    --color-accent-forLoop: #4fb5ff;
-    --color-accent-timeout: #f8c56a;
-    --color-accent-promiseThen: #b56cff;
-    --color-accent-asyncAwait: #b52cff;
+  --color-bg-console: hsl(40, 20%, 6%);
+  --color-bg-block-strong: hsl(40, 20%, 14%);
+  --color-border-subtle: hsl(40, 25%, 18%);
 
-    --color-text-primary: #e5e7eb;
-    --color-text-muted: #9ca3af;
-    --color-border-subtle: #1f2933;
+  --color-text-primary: hsl(42, 50%, 92%);
+  --color-text-muted: hsl(40, 20%, 55%);
 
-    --shadow-card-soft: 0 8px 20px rgba(0, 0, 0, 0.4);
-    --shadow-glow-console: 0 0 14px rgba(79, 213, 255, 0.4);
-    --shadow-glow-forLoop: 0 0 14px rgba(79, 195, 255, 0.4);
-    --shadow-glow-timeout: 0 0 14px rgba(248, 197, 106, 0.4);
-    --shadow-glow-promiseThen: 0 0 14px rgba(181, 108, 255, 0.4);
-    --shadow-glow-asyncAwait: 0 0 14px rgba(191, 108, 255, 0.4);
+  --color-accent-console: hsl(174, 60%, 55%);
+  --color-accent-forLoop: hsl(200, 65%, 58%);
+  --color-accent-timeout: hsl(25, 85%, 62%);
+  --color-accent-promiseThen: hsl(262, 80%, 72%);
+  --color-accent-asyncAwait: hsl(330, 75%, 65%);
 
-    --color-bg-console: #0a0f14;
-    --color-bg-block-strong: #1a2332;
+  --color-accent-gold: hsl(47, 72%, 53%);
+  --color-accent-gold-hover: hsl(47, 80%, 60%);
+  --color-accent-gold-muted: hsl(47, 50%, 40%);
 
-    --color-accent-success: #4ade80;
-    --color-accent-warning: #fbbf24;
-    --color-accent-danger: #f87171;
+  --color-accent-success: hsl(142, 70%, 55%);
+  --color-accent-warning: hsl(47, 85%, 55%);
+  --color-accent-danger: hsl(0, 75%, 62%);
 
-    --color-zone-callstack: #3b82f6;
-    --color-zone-microtask: #a855f7;
-    --color-zone-macrotask: #f59e0b;
-    --color-zone-webapi: #06b6d4;
+  --color-zone-callstack: hsl(217, 80%, 65%);
+  --color-zone-microtask: hsl(280, 70%, 68%);
+  --color-zone-macrotask: hsl(32, 90%, 58%);
+  --color-zone-webapi: hsl(174, 60%, 50%);
 
-    --shadow-glow-success: 0 0 16px rgba(74, 222, 128, 0.5);
-    --shadow-glow-warning: 0 0 16px rgba(251, 191, 36, 0.5);
-    --shadow-glow-danger: 0 0 16px rgba(248, 113, 113, 0.5);
+  --shadow-card-soft: 0 4px 16px hsla(40, 30%, 4%, 0.5);
 
-    --gradient-cta: linear-gradient(135deg, #b56cff 0%, #b52cff 100%);
+  --shadow-glow-console: 0 0 12px hsla(174, 60%, 55%, 0.3);
+  --shadow-glow-forLoop: 0 0 12px hsla(200, 65%, 58%, 0.3);
+  --shadow-glow-timeout: 0 0 12px hsla(25, 85%, 62%, 0.3);
+  --shadow-glow-promiseThen: 0 0 12px hsla(262, 80%, 72%, 0.3);
+  --shadow-glow-asyncAwait: 0 0 12px hsla(330, 75%, 65%, 0.3);
+
+  --shadow-glow-success: 0 0 14px hsla(142, 70%, 55%, 0.35);
+  --shadow-glow-warning: 0 0 14px hsla(47, 85%, 55%, 0.35);
+  --shadow-glow-danger: 0 0 14px hsla(0, 75%, 62%, 0.35);
+
+  --gradient-cta: linear-gradient(135deg, hsl(48, 72%, 43%) 0%, hsl(47, 72%, 53%) 100%);
 }
 
-html, body, #root {
-    height: 100%;
+html,
+body,
+#root {
+  height: 100%;
 }
 
 body {
-    margin: 0;
+  margin: 0;
 }
 
 .program-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #4b5563 #111827;
+  scrollbar-color: hsl(40, 30%, 25%) hsl(40, 16%, 12%);
 }
 
 .program-scroll::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .program-scroll::-webkit-scrollbar-track {
-  background: #111827;
+  background: hsl(40, 16%, 12%);
   border-radius: 9999px;
 }
 
 .program-scroll::-webkit-scrollbar-thumb {
-  background: #4b5563;
+  background: hsl(40, 30%, 25%);
   border-radius: 9999px;
-  border: 2px solid #111827;
+  border: 1px solid hsl(40, 16%, 12%);
+  transition: background 0.2s ease;
 }
 
 .program-scroll::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+  background: hsl(47, 50%, 35%);
 }
-
 
 @keyframes pulse-subtle {
-  0%, 100% {
-      opacity: 1;
-      box-shadow: 0 4px 12px rgba(181, 108, 255, 0.3);
+
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 4px 12px hsla(48, 72%, 43%, 0.25);
   }
+
   50% {
-      opacity: 0.9;
-      box-shadow: 0 4px 20px rgba(181, 44, 255, 0.5);
+    opacity: 0.92;
+    box-shadow: 0 4px 20px hsla(47, 72%, 53%, 0.4);
   }
 }
+
 .animate-pulse-subtle {
-  animation: pulse-subtle 2s ease-in-out infinite;
+  animation: pulse-subtle 2.5s ease-in-out infinite;
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .animate-shimmer {
   animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes gold-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.animate-gold-shimmer {
+  background: linear-gradient(90deg,
+      transparent 0%,
+      hsla(47, 72%, 53%, 0.12) 50%,
+      transparent 100%);
+  background-size: 200% 100%;
+  animation: gold-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes breathe {
+
+  0%,
+  100% {
+    box-shadow: 0 0 8px hsla(47, 72%, 53%, 0.15);
+  }
+
+  50% {
+    box-shadow: 0 0 16px hsla(47, 72%, 53%, 0.3);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
 }

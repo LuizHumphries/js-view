@@ -1,4 +1,4 @@
-import { generateProgramCode } from '../../domain/program/codegen'
+import { generateProgramCode } from '../../domain/program/CodeGen'
 import { useAppSelector } from '../../store/hooks'
 import { selectBlockDefinitions } from '../blocks/blocksSlice'
 import { selectProgramBlocks } from '../program/programSlice'
@@ -27,7 +27,7 @@ export default function GeneratedCodePanel() {
                     style={xonokai}
                     customStyle={{
                         margin: 0,
-                        backgroundColor: '#111827',
+                        backgroundColor: 'var(--bg-block)',
                         padding: '0.75rem',
                         borderWidth: 0,
                         borderTopRightRadius: 0,

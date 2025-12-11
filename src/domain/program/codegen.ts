@@ -1,5 +1,5 @@
 import type { BlockDefinition } from '../blocks/types'
-import { getConsoleMessagesForBlock } from './logmessage'
+import { getConsoleMessagesForBlock } from './LogMessage'
 import type { ProgramBlockInstance } from './types'
 
 export function sequenceToLabel(sequence: number): string {
