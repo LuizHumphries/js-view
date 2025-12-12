@@ -63,7 +63,6 @@ export default function TaskCard({
                 exitAnimation === 'final'
                     ? {
                           opacity: 0,
-                          // "tremor" + some fade of visual weight/colors
                           x: [0, -6, 6, -6, 6, 0],
                           rotate: [0, -2, 2, -2, 2, 0],
                           filter: ['none', 'grayscale(1)'],

@@ -8,7 +8,6 @@ export const store = configureStore({
         blocks: blocksReducer,
         program: programReducer,
         simulation: simulationReducer,
-        // ...
     },
 })
 

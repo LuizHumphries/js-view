@@ -66,6 +66,23 @@ body {
     overflow: hidden;
 }
 
+/* Mobile/tablet: permitir scroll da página inteira (<= 1024px).
+   Isso evita layout "espremido" e permite que o conteúdo tenha tamanho confortável. */
+@media (max-width: 1024px) {
+    html,
+    body,
+    #root {
+        height: auto;
+        min-height: 100%;
+        width: 100%;
+    }
+
+    body {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+}
+
 .program-scroll {
     scrollbar-width: thin;
     scrollbar-color: hsl(40, 30%, 25%) hsl(40, 16%, 12%);

@@ -36,7 +36,6 @@ export default function CodeTimeline({
             activeRef.current.scrollIntoView({
                 behavior: isRunning ? 'auto' : 'smooth',
                 block: 'nearest',
-                // Evitar qualquer tentativa de scroll horizontal.
                 inline: 'nearest',
             })
         }
@@ -64,7 +63,8 @@ export default function CodeTimeline({
             </h3>
             <div className="program-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-3">
                 <div className="flex min-h-0 flex-col gap-2">
-                    {blocks.map((block) => {
+                    {blocks.map((block, idx) => {
+                        const index = idx + 1
                         const isActive = block.state === 'active'
                         const icon = getTimelineStateIcon(block.state)
 
@@ -81,6 +81,9 @@ export default function CodeTimeline({
                                     isActive && 'scale-[1.02]',
                                 )}
                             >
+                                <span className="w-5 shrink-0 text-right font-mono text-[10px] text-slate-500">
+                                    {index}
+                                </span>
                                 <span
                                     className={cn(
                                         'w-4 text-center text-xs',
@@ -91,7 +94,7 @@ export default function CodeTimeline({
                                 </span>
                                 <span
                                     className={cn(
-                                        'min-w-0 flex-1 text-xs wrap-break-word',
+                                        'min-w-0 flex-1 overflow-hidden text-xs text-ellipsis whitespace-nowrap',
                                         block.state === 'completed'
                                             ? 'text-slate-500 line-through'
                                             : 'text-text-primary',

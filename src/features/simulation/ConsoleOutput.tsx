@@ -16,7 +16,6 @@ export default function ConsoleOutput({
     const currentLineIndex = lines.length - 1
     const scrollRef = useRef<HTMLDivElement>(null)
 
-    // Auto-scroll to bottom when new lines are added
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight
@@ -31,10 +30,12 @@ export default function ConsoleOutput({
     }, [lines])
 
     return (
-        <div ref={scrollRef} className="program-scroll flex-1 overflow-y-auto text-xs">
+        <div
+            ref={scrollRef}
+            className="program-scroll flex-1 overflow-x-hidden overflow-y-auto text-xs"
+        >
             <AnimatePresence mode="sync">
                 {displayLines.map((line) => {
-                    // Only highlight current line if simulation is NOT complete
                     const isCurrentLine =
                         !line.isPlaceholder &&
                         line.index === currentLineIndex &&

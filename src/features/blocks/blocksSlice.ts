@@ -61,10 +61,7 @@ const initialState: BlocksState = {
 export const blocksSlice = createSlice({
     name: 'blocks',
     initialState,
-    reducers: {
-        // MVP: sem reducers mesmo.
-        // Futuro: registerCustomBlock, resetPallete, etc.
-    },
+    reducers: {},
 })
 
 export const blocksReducer = blocksSlice.reducer

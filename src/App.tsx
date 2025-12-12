@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@base-ui-components/react'
 import { Toast } from '@base-ui-components/react/toast'
 import BlockList from './features/blocks/BlockList'
@@ -9,6 +9,7 @@ import './styles/global.css'
 import { useAppSelector } from './store/hooks'
 import { selectCurrentBlockHash, selectIsSimulationStale } from './features/simulation/selector'
 import BuildSimulationButton from './features/simulation/BuildSimulationButton'
+import { AnimatePresence, motion } from 'framer-motion'
 
 type PanelTab = 'montagem' | 'execucao'
 
@@ -16,11 +17,26 @@ function AppInner() {
     const [panelTab, setPanelTab] = useState<PanelTab>('montagem')
     const [isBlocksOpen, setIsBlocksOpen] = useState<boolean>(false)
     const [isCodeOpen, setIsCodeOpen] = useState<boolean>(false)
+    const [isMdUp, setIsMdUp] = useState<boolean>(() => {
+        if (typeof window === 'undefined') return true
+        if (!('matchMedia' in window)) return true
+        return window.matchMedia('(min-width: 768px)').matches
+    })
 
     const isStale = useAppSelector(selectIsSimulationStale)
     const currentBlockHash = useAppSelector(selectCurrentBlockHash)
 
     const toast = Toast.useToastManager()
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+        if (!('matchMedia' in window)) return
+        const mql = window.matchMedia('(min-width: 768px)')
+        const onChange = () => setIsMdUp(mql.matches)
+        onChange()
+        mql.addEventListener('change', onChange)
+        return () => mql.removeEventListener('change', onChange)
+    }, [])
 
     const panelNode = useMemo(() => {
         switch (panelTab) {
@@ -33,10 +49,11 @@ function AppInner() {
     }, [panelTab])
 
     return (
-        <div className="flex h-dvh w-full overflow-hidden bg-bg-app p-2 sm:p-4">
-            <div className="flex h-full min-h-0 w-full flex-col gap-3 overflow-hidden rounded-2xl border border-accent-promiseThen bg-bg-app p-3 sm:p-4">
-                <div className="flex items-center justify-between gap-3 rounded-xl bg-bg-block-hover px-3 py-2">
-                    <div className="flex items-center gap-1 rounded-lg bg-bg-block p-1">
+        <div className="flex min-h-dvh w-full overflow-x-hidden bg-bg-app p-2 sm:p-4 lg:h-dvh lg:overflow-hidden">
+            <div className="flex w-full flex-col gap-3 rounded-2xl border border-accent-promiseThen bg-bg-app p-3 sm:p-4 lg:h-full lg:min-h-0 lg:overflow-hidden">
+                <div className="flex flex-col gap-2 rounded-xl bg-bg-block-hover px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                    {/* Tabs: em telas pequenas vira select para não estourar layout */}
+                    <div className="hidden items-center gap-1 rounded-lg bg-bg-block p-1 sm:flex">
                         <Button
                             type="button"
                             onClick={() => setPanelTab('montagem')}
@@ -63,7 +80,22 @@ function AppInner() {
                         </Button>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="sm:hidden">
+                        <label className="sr-only" htmlFor="panel-tab-select">
+                            Selecionar painel
+                        </label>
+                        <select
+                            id="panel-tab-select"
+                            value={panelTab}
+                            onChange={(e) => setPanelTab(e.target.value as PanelTab)}
+                            className="w-full rounded-lg border border-border-subtle bg-bg-block px-3 py-2 text-sm text-text-primary"
+                        >
+                            <option value="montagem">Montagem</option>
+                            <option value="execucao">Execução</option>
+                        </select>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
                         <BuildSimulationButton
                             currentBlockHash={currentBlockHash}
                             isStale={isStale}
@@ -115,73 +147,105 @@ function AppInner() {
                     </div>
                 </div>
 
-                <div className="min-h-0 flex-1 overflow-hidden">{panelNode}</div>
+                <div className="flex-1 lg:min-h-0 lg:overflow-hidden">{panelNode}</div>
 
-                {isBlocksOpen && (
-                    <div className="fixed inset-0 z-50">
-                        <Button
-                            type="button"
-                            aria-label="Fechar blocos"
-                            onClick={() => setIsBlocksOpen(false)}
-                            className="absolute inset-0 bg-black/60"
-                        />
+                <AnimatePresence>
+                    {isBlocksOpen ? (
+                        <motion.div
+                            className="fixed inset-0 z-50"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                        >
+                            <motion.button
+                                type="button"
+                                aria-label="Fechar blocos"
+                                onClick={() => setIsBlocksOpen(false)}
+                                className="absolute inset-0 bg-black/60"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                            />
 
-                        <div className="absolute right-0 bottom-0 left-0 flex max-h-[85dvh] flex-col overflow-hidden rounded-t-2xl border border-border-subtle bg-bg-panel p-3 md:inset-y-0 md:left-auto md:max-h-none md:w-[420px] md:rounded-t-none md:rounded-l-2xl">
-                            <div className="mb-2 flex items-center justify-between">
-                                <h2 className="text-xs font-semibold tracking-wide text-text-primary uppercase">
-                                    Blocos
-                                </h2>
-                                <Button
-                                    type="button"
-                                    onClick={() => setIsBlocksOpen(false)}
-                                    className="rounded-md bg-bg-block px-3 py-1.5 text-sm whitespace-nowrap text-text-primary"
-                                >
-                                    Fechar
-                                </Button>
-                            </div>
+                            <motion.div
+                                className="absolute right-0 bottom-0 left-0 flex max-h-[85dvh] flex-col overflow-hidden rounded-t-2xl border border-border-subtle bg-bg-panel p-3 md:inset-y-0 md:left-auto md:max-h-none md:w-[420px] md:rounded-t-none md:rounded-l-2xl"
+                                initial={isMdUp ? { x: 18, opacity: 0 } : { y: 18, opacity: 0 }}
+                                animate={isMdUp ? { x: 0, opacity: 1 } : { y: 0, opacity: 1 }}
+                                exit={isMdUp ? { x: 18, opacity: 0 } : { y: 18, opacity: 0 }}
+                                transition={{ duration: 0.18, ease: 'easeOut' }}
+                            >
+                                <div className="mb-2 flex items-center justify-between">
+                                    <h2 className="text-xs font-semibold tracking-wide text-text-primary uppercase">
+                                        Blocos
+                                    </h2>
+                                    <Button
+                                        type="button"
+                                        onClick={() => setIsBlocksOpen(false)}
+                                        className="rounded-md bg-bg-block px-3 py-1.5 text-sm whitespace-nowrap text-text-primary"
+                                    >
+                                        Fechar
+                                    </Button>
+                                </div>
 
-                            <div className="min-h-0 flex-1 overflow-y-auto">
-                                <BlockList
-                                    fullWidth
-                                    showHeader={false}
-                                    onBlockAdded={() => {
-                                        setPanelTab('montagem')
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                )}
+                                <div className="min-h-0 flex-1 overflow-y-auto">
+                                    <BlockList
+                                        fullWidth
+                                        showHeader={false}
+                                        onBlockAdded={() => {
+                                            setPanelTab('montagem')
+                                        }}
+                                    />
+                                </div>
+                            </motion.div>
+                        </motion.div>
+                    ) : null}
+                </AnimatePresence>
 
-                {isCodeOpen && (
-                    <div className="fixed inset-0 z-50">
-                        <Button
-                            type="button"
-                            aria-label="Fechar código"
-                            onClick={() => setIsCodeOpen(false)}
-                            className="absolute inset-0 bg-black/60"
-                        />
+                <AnimatePresence>
+                    {isCodeOpen ? (
+                        <motion.div
+                            className="fixed inset-0 z-50"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                        >
+                            <motion.button
+                                type="button"
+                                aria-label="Fechar código"
+                                onClick={() => setIsCodeOpen(false)}
+                                className="absolute inset-0 bg-black/60"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                            />
 
-                        <div className="absolute inset-0 flex flex-col overflow-hidden border border-border-subtle bg-bg-panel p-3 md:inset-y-0 md:left-auto md:w-[560px] md:rounded-l-2xl">
-                            <div className="mb-2 flex items-center justify-between">
-                                <h2 className="text-xs font-semibold tracking-wide text-text-primary uppercase">
-                                    Código gerado
-                                </h2>
-                                <Button
-                                    type="button"
-                                    onClick={() => setIsCodeOpen(false)}
-                                    className="rounded-md bg-bg-block px-3 py-1.5 text-sm whitespace-nowrap text-text-primary"
-                                >
-                                    Fechar
-                                </Button>
-                            </div>
+                            <motion.div
+                                className="absolute inset-0 flex flex-col overflow-hidden border border-border-subtle bg-bg-panel p-3 md:inset-y-0 md:left-auto md:w-[560px] md:rounded-l-2xl"
+                                initial={isMdUp ? { x: 18, opacity: 0 } : { y: 18, opacity: 0 }}
+                                animate={isMdUp ? { x: 0, opacity: 1 } : { y: 0, opacity: 1 }}
+                                exit={isMdUp ? { x: 18, opacity: 0 } : { y: 18, opacity: 0 }}
+                                transition={{ duration: 0.18, ease: 'easeOut' }}
+                            >
+                                <div className="mb-2 flex items-center justify-between">
+                                    <h2 className="text-xs font-semibold tracking-wide text-text-primary uppercase">
+                                        Código gerado
+                                    </h2>
+                                    <Button
+                                        type="button"
+                                        onClick={() => setIsCodeOpen(false)}
+                                        className="rounded-md bg-bg-block px-3 py-1.5 text-sm whitespace-nowrap text-text-primary"
+                                    >
+                                        Fechar
+                                    </Button>
+                                </div>
 
-                            <div className="min-h-0 flex-1 overflow-hidden">
-                                <GeneratedCodePanel showHeader={false} />
-                            </div>
-                        </div>
-                    </div>
-                )}
+                                <div className="min-h-0 flex-1 overflow-hidden">
+                                    <GeneratedCodePanel showHeader={false} />
+                                </div>
+                            </motion.div>
+                        </motion.div>
+                    ) : null}
+                </AnimatePresence>
             </div>
 
             {/* Toasts devem ser independentes do layout: Portal + Viewport + Roots dentro do viewport */}
