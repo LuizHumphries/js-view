@@ -29,7 +29,6 @@ export default function Zone({ title, variant = 'callstack', children }: ZonePro
         <section
             className={cn(
                 'flex w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border-subtle bg-bg-panel p-2 sm:p-3',
-                // Altura mais flexível em telas menores (evita “atochar” o motor JS / console).
                 'min-h-[72px] sm:min-h-[110px]',
                 variantStyle,
             )}
@@ -44,7 +43,7 @@ export default function Zone({ title, variant = 'callstack', children }: ZonePro
                     {title}
                 </h3>
             </header>
-            <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto sm:gap-2">
+            <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-x-hidden overflow-y-auto sm:gap-2">
                 {children}
             </div>
         </section>

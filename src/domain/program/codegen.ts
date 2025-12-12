@@ -4,7 +4,6 @@ import type { ProgramBlockInstance } from './types'
 import { getTimeoutDelayMs } from '../simulation/compileBlocksToOps'
 import { sequenceToLabel } from './sequenceUtils'
 
-// Re-export for backward compatibility
 export { sequenceToLabel }
 
 export function generateProgramCode(

@@ -43,18 +43,14 @@ export const selectBlocksWithTimelineState = createSelector(
         const currentStep = steps[currentStepIndex] ?? steps[steps.length - 1]
         const isFinished = currentStepIndex >= steps.length - 1
 
-        // Use the step's tracking of active and waiting blocks
         const activeBlockId = currentStep.activeBlockInstanceId
         const waitingBlockIds = new Set(currentStep.waitingBlockInstanceIds)
 
-        // Track which blocks have been fully completed (processed and not waiting)
         const completedBlockIds = new Set<string>()
 
-        // A block is completed if it was processed in previous steps and is not currently waiting
         for (let i = 0; i < currentStepIndex; i++) {
             const step = steps[i]
             if (step.activeBlockInstanceId && !waitingBlockIds.has(step.activeBlockInstanceId)) {
-                // Check if this block has any tasks still in queues
                 const hasTasksInQueues =
                     currentStep.microTaskQueue.some(
                         (t) => t.blockInstanceId === step.activeBlockInstanceId,

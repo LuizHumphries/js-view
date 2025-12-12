@@ -32,29 +32,60 @@ export default function SimulationVisualizer() {
     const blocksWithState = useAppSelector(selectBlocksWithTimelineState)
     const programBlocks = useAppSelector(selectProgramBlocks)
 
-    // Task que está transitando pelo Event Loop (saiu da fila, ainda não entrou na Call Stack)
     const eventLoopTransitTask = currentStep?.currentlyProcessing ?? null
 
-    // Task que está no JS Engine (antes de ir para Call Stack ou filas)
     const jsEngineTask = currentStep?.jsEngineTask ?? null
 
-    const transferAnimMs = simulation.ui.transferAnimMs
+    const transferAnimSpeed = simulation.ui.transferAnimSpeed
+    const transferAnimDurationS = useMemo(() => {
+        const MIN_S = 0.15
+        const MAX_S = 2.0
+        const t = Math.min(Math.max(transferAnimSpeed, 0), 100) / 100
+        return MAX_S + (MIN_S - MAX_S) * t
+    }, [transferAnimSpeed])
 
-    // Quando uma task "entra no Motor JS", queremos animar ela saindo do Timeline
-    // e chegando no Motor, acima de todos os blocos.
+    const transitionStepRef = useRef<number | null>(null)
+    const shouldAutoAdvanceRef = useRef(false)
+    const animationsInFlightRef = useRef(0)
+    const transitionCycleClosedRef = useRef(false)
+    const flightHiddenIdsRef = useRef<Set<string>>(new Set())
+    const zoneFlightRemainingRef = useRef(0)
+
     const lastEngineTaskIdRef = useRef<string | null>(null)
     const prevStepIndexRef = useRef<number>(currentStepIndex)
     const navDeltaRef = useRef<number>(0)
     const [engineHoldTaskId, setEngineHoldTaskId] = useState<string | null>(null)
     const [isStepsHistoryOpen, setIsStepsHistoryOpen] = useState(false)
+    const [isMdUp, setIsMdUp] = useState<boolean>(() => {
+        if (typeof window === 'undefined') return true
+        if (!('matchMedia' in window)) return true
+        return window.matchMedia('(min-width: 768px)').matches
+    })
     const [transferTask, setTransferTask] = useState<{
         task: SimulationTask
         from: { left: number; top: number; width: number; height: number }
         to: { left: number; top: number; width: number; height: number }
     } | null>(null)
 
-    // Regra de UX: não mostrar "futuro" no histórico.
-    // O usuário só pode ver/navegar até o step atual.
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+        if (!('matchMedia' in window)) return
+        const mql = window.matchMedia('(min-width: 768px)')
+        const onChange = () => setIsMdUp(mql.matches)
+        onChange()
+        mql.addEventListener('change', onChange)
+        return () => mql.removeEventListener('change', onChange)
+    }, [])
+
+    function getFirstVisibleEl(selector: string): HTMLElement | null {
+        const nodes = Array.from(document.querySelectorAll(selector)) as HTMLElement[]
+        for (const el of nodes) {
+            const r = el.getBoundingClientRect()
+            if (r.width > 1 && r.height > 1) return el
+        }
+        return null
+    }
+
     const visibleSteps = useMemo(() => {
         if (steps.length === 0) return []
         const max = Math.min(currentStepIndex + 1, steps.length)
@@ -76,28 +107,53 @@ export default function SimulationVisualizer() {
     >([])
     const lastFlightStepRef = useRef<number | null>(null)
 
-    // Detecta direção/avanço do step.
-    // Importante: isso precisa acontecer ANTES do cálculo das posições (useLayoutEffect abaixo),
-    // senão o delta ainda é 0 e a animação não dispara.
     useLayoutEffect(() => {
         navDeltaRef.current = currentStepIndex - prevStepIndexRef.current
         prevStepIndexRef.current = currentStepIndex
 
-        // Animamos quando avançamos exatamente +1 step.
-        // (Assim: não anima "pulos" via timeline, nem voltar, nem reset.)
+        setTransferTask(null)
+        setEngineHoldTaskId(null)
+        setZoneFlights([])
+        setHiddenTaskIds(new Set())
+
         const shouldAnimate = steps.length > 0 && navDeltaRef.current === 1 && status !== 'idle'
+
+        transitionCycleClosedRef.current = false
+        animationsInFlightRef.current = 0
+        flightHiddenIdsRef.current = new Set()
+        zoneFlightRemainingRef.current = 0
+        shouldAutoAdvanceRef.current = status === 'running' && shouldAnimate
+        transitionStepRef.current = shouldAutoAdvanceRef.current ? currentStepIndex : null
+
         if (!shouldAnimate) {
-            // Ao voltar, resetar ou "pular" steps, limpamos overlays/holds para não ficar nada fantasma.
-            setTransferTask(null)
-            setEngineHoldTaskId(null)
-            setZoneFlights([])
-            setHiddenTaskIds(new Set())
             prevDomTasksRef.current = new Map()
             lastFlightStepRef.current = null
+            shouldAutoAdvanceRef.current = false
+            transitionStepRef.current = null
         }
     }, [currentStepIndex, status, steps.length])
 
-    // Quando a simulação muda (regerar/reset), também limpa qualquer estado local de animação.
+    const prevStatusRef = useRef(status)
+    useEffect(() => {
+        const prevStatus = prevStatusRef.current
+        prevStatusRef.current = status
+
+        const justStartedRunning = status === 'running' && prevStatus !== 'running'
+        if (!justStartedRunning) return
+        if (steps.length === 0) return
+
+        const isLastStep = currentStepIndex >= steps.length - 1
+        if (isLastStep) {
+            if (simulation.playback.autoplay) {
+                dispatch(goToStep(0))
+                dispatch(nextStep())
+            }
+            return
+        }
+
+        dispatch(nextStep())
+    }, [status, steps.length, currentStepIndex, simulation.playback.autoplay, dispatch])
+
     useEffect(() => {
         setTransferTask(null)
         setEngineHoldTaskId(null)
@@ -114,50 +170,57 @@ export default function SimulationVisualizer() {
         dispatch(resetSimulation())
     }, [programBlocks.length, simulation.steps.length, simulation.status, dispatch])
 
-    useEffect(() => {
+    const advanceAfterAnimations = () => {
         if (status !== 'running') return
         if (steps.length === 0) return
+        if (transitionStepRef.current !== currentStepIndex) return
 
         const isLastStep = currentStepIndex >= steps.length - 1
+        if (!isLastStep) {
+            dispatch(nextStep())
+            return
+        }
 
-        const timeoutId = setTimeout(() => {
-            if (!isLastStep) {
-                dispatch(nextStep())
-            } else if (simulation.playback.autoplay) {
-                dispatch(goToStep(0))
-                dispatch(play())
-            } else {
-                dispatch(pause())
-            }
-        }, transferAnimMs + 50)
+        if (simulation.playback.autoplay) {
+            dispatch(goToStep(0))
+            dispatch(play())
+            return
+        }
 
-        return () => clearTimeout(timeoutId)
-    }, [
-        status,
-        steps.length,
-        currentStepIndex,
-        simulation.playback.autoplay,
-        transferAnimMs,
-        dispatch,
-    ])
+        dispatch(pause())
+    }
 
-    useEffect(() => {
+    const registerAnimations = (count: number) => {
+        if (!shouldAutoAdvanceRef.current) return
+        if (transitionStepRef.current !== currentStepIndex) return
+        if (count <= 0) return
+        animationsInFlightRef.current += count
+    }
+
+    const completeOneAnimation = () => {
+        if (!shouldAutoAdvanceRef.current) return
+        if (transitionStepRef.current !== currentStepIndex) return
+
+        animationsInFlightRef.current = Math.max(0, animationsInFlightRef.current - 1)
+        if (!transitionCycleClosedRef.current) return
+        if (animationsInFlightRef.current !== 0) return
+
+        advanceAfterAnimations()
+    }
+
+    useLayoutEffect(() => {
         const nextTaskId = jsEngineTask?.id ?? null
         const prevTaskId = lastEngineTaskIdRef.current
-        // sempre atualiza, mesmo quando não animamos, pra evitar re-disparos estranhos
         lastEngineTaskIdRef.current = nextTaskId
 
         const shouldAnimate = steps.length > 0 && navDeltaRef.current === 1 && status !== 'idle'
 
-        // Só dispara quando uma NOVA task aparece no Motor JS
         if (!nextTaskId) return
         if (prevTaskId === nextTaskId) return
         if (!jsEngineTask) return
         if (!shouldAnimate) return
 
-        const fromEl = document.querySelector(
-            '[data-sim-timeline-active="true"]',
-        ) as HTMLElement | null
+        const fromEl = getFirstVisibleEl('[data-sim-timeline-active="true"]')
         const toEl =
             (document.querySelector(
                 `[data-sim-task-id="${nextTaskId}"][data-sim-zone="engine"]`,
@@ -168,21 +231,24 @@ export default function SimulationVisualizer() {
         const from = fromEl.getBoundingClientRect()
         const to = toEl.getBoundingClientRect()
 
-        // Segura a renderização da task no Motor até a animação terminar
+        const width = to.width
+        const height = to.height
+        const fromLeft = from.left + (from.width - width) / 2
+        const fromTop = from.top + (from.height - height) / 2
+
         setEngineHoldTaskId(nextTaskId)
+        registerAnimations(1)
         setTransferTask({
             task: jsEngineTask,
-            from: { left: from.left, top: from.top, width: from.width, height: from.height },
-            to: { left: to.left, top: to.top, width: to.width, height: to.height },
+            from: { left: fromLeft, top: fromTop, width, height },
+            to: { left: to.left, top: to.top, width, height },
         })
     }, [jsEngineTask, status, currentStepIndex])
 
-    // Captura posições reais no DOM e cria "voos" entre zonas sem clipping.
     useLayoutEffect(() => {
         if (!currentStep) return
         const shouldAnimate = steps.length > 0 && navDeltaRef.current === 1 && status !== 'idle'
         if (!shouldAnimate) {
-            // Sem animação quando voltamos/pulamos: só atualiza cache de posições.
             const nextMap = new Map<string, DomTaskInfo>()
             const nodes = document.querySelectorAll('[data-sim-task-id]')
             nodes.forEach((node) => {
@@ -200,9 +266,7 @@ export default function SimulationVisualizer() {
             return
         }
 
-        // Evita recriar os mesmos voos em re-renders do mesmo step.
         if (lastFlightStepRef.current === currentStepIndex) {
-            // Atualiza o cache de posições mesmo assim.
             const nextMap = new Map<string, DomTaskInfo>()
             const nodes = document.querySelectorAll('[data-sim-task-id]')
             nodes.forEach((node) => {
@@ -285,44 +349,110 @@ export default function SimulationVisualizer() {
 
         if (flights.length === 0) return
 
+        registerAnimations(flights.length)
+        zoneFlightRemainingRef.current = flights.length
+        flightHiddenIdsRef.current = hide
         setZoneFlights(flights)
         setHiddenTaskIds((prev) => {
             const merged = new Set(prev)
             hide.forEach((id) => merged.add(id))
             return merged
         })
+    }, [currentStepIndex, currentStep, steps, status])
 
-        const timeoutId = window.setTimeout(() => {
-            setZoneFlights([])
-            setHiddenTaskIds((prev) => {
-                const next = new Set(prev)
-                hide.forEach((id) => next.delete(id))
-                return next
+    useEffect(() => {
+        if (!shouldAutoAdvanceRef.current) return
+        if (transitionStepRef.current !== currentStepIndex) return
+
+        transitionCycleClosedRef.current = true
+        if (animationsInFlightRef.current === 0) {
+            queueMicrotask(() => {
+                if (transitionStepRef.current !== currentStepIndex) return
+                if (!shouldAutoAdvanceRef.current) return
+                if (animationsInFlightRef.current !== 0) return
+                advanceAfterAnimations()
             })
-        }, transferAnimMs)
-
-        return () => window.clearTimeout(timeoutId)
-    }, [currentStepIndex, currentStep, steps, transferAnimMs, status])
+        }
+    }, [currentStepIndex])
 
     return (
-        <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl bg-bg-block">
-            <header className="relative z-20 flex flex-row items-center justify-between gap-2 rounded-t-xl bg-bg-block-hover px-5 py-1">
-                <div className="flex flex-row gap-4">
-                    <h2 className="font-bold tracking-wide text-text-primary uppercase">
-                        Visualizador do Event Loop
-                    </h2>
+        <section className="flex min-w-0 flex-1 flex-col rounded-xl bg-bg-block lg:h-full lg:min-h-0 lg:overflow-hidden">
+            <header className="sticky top-0 z-50 flex flex-row items-center justify-between gap-2 rounded-t-xl bg-bg-block-hover px-5 py-1 md:static">
+                <div className="min-w-0" />
+                <div className="min-w-0 flex-1">
+                    <SimulationControls simulation={simulation} />
                 </div>
-                <SimulationControls simulation={simulation} />
             </header>
 
-            <div className="px-4 pt-2 sm:pt-3">
-                <div className="rounded-xl border border-border-subtle bg-bg-panel/60 px-4 py-3 shadow-md sm:p-4">
-                    <div className="flex items-start justify-between gap-3">
+            {!isMdUp && isStepsHistoryOpen ? (
+                <section className="border-b border-border-subtle bg-bg-panel/30 px-4 py-3">
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex flex-col">
+                            <span className="text-[10px] font-semibold tracking-[0.14em] text-slate-400 uppercase">
+                                Histórico de steps
+                            </span>
+                            <span className="text-xs text-text-muted">
+                                {steps.length
+                                    ? `Step ${Math.min(currentStepIndex + 1, steps.length)}/${steps.length}`
+                                    : 'Sem steps ainda'}
+                            </span>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setIsStepsHistoryOpen(false)}
+                            className="rounded-lg border border-border-subtle bg-bg-block-hover p-2 text-text-primary transition-colors hover:bg-bg-block-strong"
+                            aria-label="Fechar"
+                        >
+                            <LucideX className="h-4 w-4" />
+                        </button>
+                    </div>
+
+                    <div className="mt-3 max-h-[50dvh] overflow-auto">
+                        {visibleSteps.length === 0 ? (
+                            <div className="p-3 text-sm text-text-muted">
+                                Gere a simulação para ver o histórico.
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-1">
+                                {visibleSteps.map((s, idx) => {
+                                    const isActive = idx === currentStepIndex
+                                    return (
+                                        <button
+                                            key={`step-history-inline-${idx}`}
+                                            type="button"
+                                            onClick={() => dispatch(goToStep(idx))}
+                                            className={cn(
+                                                'w-full rounded-lg border px-3 py-2 text-left text-[11px] md:text-xs',
+                                                'transition-colors',
+                                                isActive
+                                                    ? 'border-accent-gold/40 bg-accent-gold/10 text-text-primary'
+                                                    : 'border-border-subtle bg-bg-block/40 text-slate-200/85 hover:bg-bg-block-hover',
+                                            )}
+                                        >
+                                            <span className="font-mono text-[11px] text-slate-400">
+                                                {idx + 1}
+                                            </span>
+                                            <span className="mx-2 text-slate-500">→</span>
+                                            <span className="text-[11px] md:text-xs">
+                                                {s.description ?? '—'}
+                                            </span>
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        )}
+                    </div>
+                </section>
+            ) : null}
+
+            <div className="px-3 pt-2 sm:px-4 sm:pt-3">
+                <div className="rounded-xl border border-border-subtle bg-bg-panel/60 px-3 py-1.5 shadow-md sm:px-4 sm:py-3">
+                    <div className="flex items-center justify-between gap-3">
                         <p className="text-sm text-slate-200/85">
                             <span className="mr-2 font-mono text-[12px] text-slate-400">
                                 {steps.length ? `${currentStepIndex + 1}/${steps.length}` : '—'}
                             </span>
-                            <span className="mr-2 text-slate-500">-&gt;</span>
+                            <span className="mr-2 text-slate-500">→</span>
                             {programBlocks.length === 0
                                 ? 'Selecione os blocos disponíveis e clique em Gerar para iniciar a simulação.'
                                 : (currentStep?.description ??
@@ -330,7 +460,7 @@ export default function SimulationVisualizer() {
                         </p>
                         <button
                             type="button"
-                            onClick={() => setIsStepsHistoryOpen(true)}
+                            onClick={() => setIsStepsHistoryOpen((prev) => (isMdUp ? true : !prev))}
                             className={cn(
                                 'shrink-0 rounded-lg border border-border-subtle bg-bg-block-hover px-3 py-2 text-xs font-semibold tracking-wide text-text-primary',
                                 'transition-colors hover:bg-bg-block-strong',
@@ -342,7 +472,7 @@ export default function SimulationVisualizer() {
                 </div>
             </div>
 
-            <main className="flex min-h-0 flex-1 gap-3 overflow-hidden p-4 sm:gap-4">
+            <main className="flex flex-1 gap-3 p-4 sm:gap-4 lg:min-h-0 lg:overflow-hidden">
                 <LayoutGroup>
                     <div className="hidden w-56 shrink-0 md:block">
                         <CodeTimeline
@@ -352,7 +482,7 @@ export default function SimulationVisualizer() {
                         />
                     </div>
 
-                    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden sm:gap-4">
+                    <div className="flex min-h-0 flex-1 flex-col gap-2 sm:gap-4 lg:overflow-hidden">
                         <div className="shrink-0 md:hidden">
                             <div className="h-28 sm:h-32">
                                 <CodeTimeline
@@ -363,7 +493,7 @@ export default function SimulationVisualizer() {
                             </div>
                         </div>
 
-                        <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 overflow-hidden sm:gap-4 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start">
+                        <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 sm:gap-4 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start lg:overflow-hidden">
                             <div className="min-w-0">
                                 <EventLoopZone
                                     status={status}
@@ -372,7 +502,7 @@ export default function SimulationVisualizer() {
                                 />
                             </div>
 
-                            <div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
+                            <div className="flex min-h-0 min-w-0 flex-col lg:overflow-hidden">
                                 <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
                                     <Zone title="Call Stack">
                                         <AnimatePresence initial={false}>
@@ -470,7 +600,6 @@ export default function SimulationVisualizer() {
                 </LayoutGroup>
             </main>
 
-            {/* Overlay global (Portal): anima a task do Timeline até o Motor JS */}
             {transferTask
                 ? createPortal(
                       <motion.div
@@ -491,13 +620,13 @@ export default function SimulationVisualizer() {
                               scale: 1.02,
                           }}
                           transition={{
-                              duration: transferAnimMs / 1000,
+                              duration: transferAnimDurationS,
                               ease: [0.22, 1, 0.36, 1],
                           }}
                           onAnimationComplete={() => {
-                              // Libera o Motor para renderizar a task "depois" da animação
                               setTransferTask(null)
                               setEngineHoldTaskId(null)
+                              completeOneAnimation()
                           }}
                           style={{
                               position: 'fixed',
@@ -505,7 +634,8 @@ export default function SimulationVisualizer() {
                               pointerEvents: 'none',
                           }}
                           className={cn(
-                              'rounded-xl border bg-bg-block-strong px-3 py-2 text-xs text-text-primary shadow-xl',
+                              'rounded-xl border bg-bg-block-strong px-2 py-1.5 text-[11px] text-text-primary shadow-xl sm:px-3 sm:py-2 sm:text-xs',
+                              'flex items-center gap-2',
                               getTaskBorderClasses(transferTask.task.source),
                           )}
                       >
@@ -515,7 +645,6 @@ export default function SimulationVisualizer() {
                   )
                 : null}
 
-            {/* Voos entre zonas (Callstack <-> Filas <-> Web APIs <-> EventLoop <-> Motor JS) */}
             {zoneFlights.length > 0
                 ? createPortal(
                       <div
@@ -547,8 +676,27 @@ export default function SimulationVisualizer() {
                                       opacity: 1,
                                   }}
                                   transition={{
-                                      duration: transferAnimMs / 1000,
+                                      duration: transferAnimDurationS,
                                       ease: [0.22, 1, 0.36, 1],
+                                  }}
+                                  onAnimationComplete={() => {
+                                      zoneFlightRemainingRef.current = Math.max(
+                                          0,
+                                          zoneFlightRemainingRef.current - 1,
+                                      )
+
+                                      if (zoneFlightRemainingRef.current === 0) {
+                                          const hide = flightHiddenIdsRef.current
+                                          setZoneFlights([])
+                                          setHiddenTaskIds((prev) => {
+                                              const next = new Set(prev)
+                                              hide.forEach((id) => next.delete(id))
+                                              return next
+                                          })
+                                          flightHiddenIdsRef.current = new Set()
+                                      }
+
+                                      completeOneAnimation()
                                   }}
                                   style={{ position: 'fixed' }}
                                   className={cn(
@@ -564,93 +712,96 @@ export default function SimulationVisualizer() {
                   )
                 : null}
 
-            {/* Modal lateral (esquerda): histórico de steps */}
-            {createPortal(
-                <AnimatePresence>
-                    {isStepsHistoryOpen ? (
-                        <motion.div
-                            className="fixed inset-0 z-10000"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                        >
-                            <button
-                                type="button"
-                                aria-label="Fechar histórico"
-                                className="absolute inset-0 bg-black/55"
-                                onClick={() => setIsStepsHistoryOpen(false)}
-                            />
-                            <motion.aside
-                                className="absolute top-0 left-0 flex h-full w-[360px] max-w-[92vw] flex-col border-r border-border-subtle bg-bg-panel shadow-2xl"
-                                initial={{ x: -24, opacity: 0 }}
-                                animate={{ x: 0, opacity: 1 }}
-                                exit={{ x: -24, opacity: 0 }}
-                                transition={{ duration: 0.18, ease: 'easeOut' }}
-                            >
-                                <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-semibold tracking-[0.14em] text-slate-400 uppercase">
-                                            Histórico de steps
-                                        </span>
-                                        <span className="text-xs text-text-muted">
-                                            {steps.length
-                                                ? `Step ${Math.min(currentStepIndex + 1, steps.length)}/${steps.length}`
-                                                : 'Sem steps ainda'}
-                                        </span>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsStepsHistoryOpen(false)}
-                                        className="rounded-lg border border-border-subtle bg-bg-block-hover p-2 text-text-primary transition-colors hover:bg-bg-block-strong"
-                                        aria-label="Fechar"
-                                    >
-                                        <LucideX className="h-4 w-4" />
-                                    </button>
-                                </div>
+            {isMdUp
+                ? createPortal(
+                      <AnimatePresence>
+                          {isStepsHistoryOpen ? (
+                              <motion.div
+                                  className="fixed inset-0 z-10000"
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  exit={{ opacity: 0 }}
+                              >
+                                  <button
+                                      type="button"
+                                      aria-label="Fechar histórico"
+                                      className="absolute inset-0 bg-black/55"
+                                      onClick={() => setIsStepsHistoryOpen(false)}
+                                  />
+                                  <motion.aside
+                                      className="absolute top-0 left-0 flex h-full w-[360px] max-w-[92vw] flex-col border-r border-border-subtle bg-bg-panel shadow-2xl"
+                                      initial={{ x: -24, opacity: 0 }}
+                                      animate={{ x: 0, opacity: 1 }}
+                                      exit={{ x: -24, opacity: 0 }}
+                                      transition={{ duration: 0.18, ease: 'easeOut' }}
+                                  >
+                                      <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
+                                          <div className="flex flex-col">
+                                              <span className="text-[10px] font-semibold tracking-[0.14em] text-slate-400 uppercase">
+                                                  Histórico de steps
+                                              </span>
+                                              <span className="text-xs text-text-muted">
+                                                  {steps.length
+                                                      ? `Step ${Math.min(currentStepIndex + 1, steps.length)}/${steps.length}`
+                                                      : 'Sem steps ainda'}
+                                              </span>
+                                          </div>
+                                          <button
+                                              type="button"
+                                              onClick={() => setIsStepsHistoryOpen(false)}
+                                              className="rounded-lg border border-border-subtle bg-bg-block-hover p-2 text-text-primary transition-colors hover:bg-bg-block-strong"
+                                              aria-label="Fechar"
+                                          >
+                                              <LucideX className="h-4 w-4" />
+                                          </button>
+                                      </div>
 
-                                <div className="min-h-0 flex-1 overflow-auto p-2">
-                                    {visibleSteps.length === 0 ? (
-                                        <div className="p-3 text-sm text-text-muted">
-                                            Gere a simulação para ver o histórico.
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col gap-1">
-                                            {visibleSteps.map((s, idx) => {
-                                                const isActive = idx === currentStepIndex
-                                                return (
-                                                    <button
-                                                        key={`step-history-${idx}`}
-                                                        type="button"
-                                                        onClick={() => dispatch(goToStep(idx))}
-                                                        className={cn(
-                                                            'w-full rounded-lg border px-3 py-2 text-left text-xs',
-                                                            'transition-colors',
-                                                            isActive
-                                                                ? 'border-accent-gold/40 bg-accent-gold/10 text-text-primary'
-                                                                : 'border-border-subtle bg-bg-block/40 text-slate-200/85 hover:bg-bg-block-hover',
-                                                        )}
-                                                    >
-                                                        <span className="font-mono text-[11px] text-slate-400">
-                                                            {idx + 1}
-                                                        </span>
-                                                        <span className="mx-2 text-slate-500">
-                                                            -&gt;
-                                                        </span>
-                                                        <span className="text-xs">
-                                                            {s.description ?? '—'}
-                                                        </span>
-                                                    </button>
-                                                )
-                                            })}
-                                        </div>
-                                    )}
-                                </div>
-                            </motion.aside>
-                        </motion.div>
-                    ) : null}
-                </AnimatePresence>,
-                document.body,
-            )}
+                                      <div className="min-h-0 flex-1 overflow-auto p-2">
+                                          {visibleSteps.length === 0 ? (
+                                              <div className="p-3 text-sm text-text-muted">
+                                                  Gere a simulação para ver o histórico.
+                                              </div>
+                                          ) : (
+                                              <div className="flex flex-col gap-1">
+                                                  {visibleSteps.map((s, idx) => {
+                                                      const isActive = idx === currentStepIndex
+                                                      return (
+                                                          <button
+                                                              key={`step-history-${idx}`}
+                                                              type="button"
+                                                              onClick={() =>
+                                                                  dispatch(goToStep(idx))
+                                                              }
+                                                              className={cn(
+                                                                  'w-full rounded-lg border px-3 py-2 text-left text-xs',
+                                                                  'transition-colors',
+                                                                  isActive
+                                                                      ? 'border-accent-gold/40 bg-accent-gold/10 text-text-primary'
+                                                                      : 'border-border-subtle bg-bg-block/40 text-slate-200/85 hover:bg-bg-block-hover',
+                                                              )}
+                                                          >
+                                                              <span className="font-mono text-[11px] text-slate-400">
+                                                                  {idx + 1}
+                                                              </span>
+                                                              <span className="mx-2 text-slate-500">
+                                                                  -&gt;
+                                                              </span>
+                                                              <span className="text-xs">
+                                                                  {s.description ?? '—'}
+                                                              </span>
+                                                          </button>
+                                                      )
+                                                  })}
+                                              </div>
+                                          )}
+                                      </div>
+                                  </motion.aside>
+                              </motion.div>
+                          ) : null}
+                      </AnimatePresence>,
+                      document.body,
+                  )
+                : null}
         </section>
     )
 }

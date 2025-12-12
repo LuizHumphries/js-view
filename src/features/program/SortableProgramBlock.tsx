@@ -33,7 +33,11 @@ export default function SortableProgramBlock({
             className={cn('flex w-full flex-row items-center gap-4')}
             style={style}
         >
-            <div className="flex-1" {...attributes} {...listeners}>
+            <div
+                className={cn('flex-1', 'cursor-grab active:cursor-grabbing', 'touch-pan-y')}
+                {...attributes}
+                {...listeners}
+            >
                 <Block hasIconBg={false} definition={definition} hasCodeDefinition={false} />
             </div>
             <Button type="button" className="cursor-pointer" onClick={onRemove}>

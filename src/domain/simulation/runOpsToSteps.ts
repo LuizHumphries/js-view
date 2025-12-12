@@ -162,8 +162,6 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
                 )
 
                 runtime.callStack.pop()
-                // IMPORTANTE: após resolver, o bloco ainda está "waiting"
-                // (o callback do .then será enfileirado como microtask e ainda não executou).
                 runtime.waitingBlockIds.add(op.blockInstanceId)
                 steps.push(
                     snapshotState(

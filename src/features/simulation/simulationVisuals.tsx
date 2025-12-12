@@ -46,7 +46,6 @@ export function getTimelineBlockClasses(type: BlockType, state: TimelineState): 
 
     if (state === 'pending') {
         const border = getBlockBorderClass(type)
-        // Blocos que ainda não começaram ficam levemente "dimmer"
         return cn(border, 'opacity-70', 'border-opacity-40')
     }
 
