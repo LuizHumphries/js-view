@@ -49,10 +49,9 @@ function AppInner() {
     }, [panelTab])
 
     return (
-        <div className="flex min-h-dvh w-full overflow-x-hidden bg-bg-app p-2 sm:p-4 lg:h-dvh lg:overflow-hidden">
-            <div className="flex w-full flex-col gap-3 rounded-2xl border border-accent-promiseThen bg-bg-app p-3 sm:p-4 lg:h-full lg:min-h-0 lg:overflow-hidden">
+        <div className="flex min-h-dvh w-full overflow-x-hidden bg-bg-app p-2 sm:p-2 lg:h-dvh lg:overflow-hidden">
+            <div className="flex w-full flex-col gap-3 rounded-2xl border bg-bg-app p-1 sm:p-2 lg:h-full lg:min-h-0 lg:overflow-hidden">
                 <div className="flex flex-col gap-2 rounded-xl bg-bg-block-hover px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                    {/* Tabs: em telas pequenas vira select para não estourar layout */}
                     <div className="hidden items-center gap-1 rounded-lg bg-bg-block p-1 sm:flex">
                         <Button
                             type="button"

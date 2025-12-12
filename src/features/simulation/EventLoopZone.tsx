@@ -8,9 +8,15 @@ type EventLoopZoneProps = {
     status: SimulationStatus
     hasBuilt: boolean
     transitTask: SimulationTask | null
+    isHidden?: boolean
 }
 
-export default function EventLoopZone({ status, hasBuilt, transitTask }: EventLoopZoneProps) {
+export default function EventLoopZone({
+    status,
+    hasBuilt,
+    transitTask,
+    isHidden = false,
+}: EventLoopZoneProps) {
     const isAnimating = hasBuilt && status === 'running'
 
     return (
@@ -43,6 +49,7 @@ export default function EventLoopZone({ status, hasBuilt, transitTask }: EventLo
                         task={transitTask}
                         isWaiting={false}
                         zoneId="eventloop"
+                        isHidden={isHidden}
                     />
                 )}
             </div>

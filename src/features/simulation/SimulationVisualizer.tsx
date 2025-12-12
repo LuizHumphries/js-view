@@ -67,6 +67,25 @@ export default function SimulationVisualizer() {
         to: { left: number; top: number; width: number; height: number }
     } | null>(null)
 
+    function getTaskSubtitle(task: SimulationTask): string | null {
+        if (task.kind === 'promiseResolve') {
+            return 'Promise.resolve'
+        }
+        if (task.kind === 'microCallback' && task.source === 'promiseThen') {
+            return 'Microtask – callback do .then'
+        }
+        if (task.kind === 'microCallback' && task.source === 'asyncAwait') {
+            return 'Microtask – continuação do await'
+        }
+        if (task.kind === 'macroCallback' && task.source === 'timeout') {
+            if (task.remainingMs !== undefined && task.remainingMs > 0) {
+                return `setTimeout – ${task.remainingMs}ms restantes`
+            }
+            return `setTimeout callback (${task.delayMs}ms)`
+        }
+        return null
+    }
+
     useEffect(() => {
         if (typeof window === 'undefined') return
         if (!('matchMedia' in window)) return
@@ -407,7 +426,7 @@ export default function SimulationVisualizer() {
                         </button>
                     </div>
 
-                    <div className="mt-3 max-h-[50dvh] overflow-auto">
+                    <div className="program-scroll mt-3 max-h-[50dvh] overflow-x-hidden overflow-y-auto">
                         {visibleSteps.length === 0 ? (
                             <div className="p-3 text-sm text-text-muted">
                                 Gere a simulação para ver o histórico.
@@ -493,12 +512,16 @@ export default function SimulationVisualizer() {
                             </div>
                         </div>
 
-                        <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 sm:gap-4 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start lg:overflow-hidden">
+                        <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 sm:gap-4 md:flex-none md:shrink-0 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start lg:overflow-hidden">
                             <div className="min-w-0">
                                 <EventLoopZone
                                     status={status}
                                     hasBuilt={steps.length > 0}
                                     transitTask={eventLoopTransitTask}
+                                    isHidden={
+                                        !!eventLoopTransitTask &&
+                                        hiddenTaskIds.has(eventLoopTransitTask.id)
+                                    }
                                 />
                             </div>
 
@@ -586,7 +609,7 @@ export default function SimulationVisualizer() {
                             </div>
                         </div>
 
-                        <section className="flex h-32 shrink-0 flex-col rounded-xl border border-slate-800 bg-black/60 p-3 sm:h-36 md:h-40 lg:h-44">
+                        <section className="flex h-32 shrink-0 flex-col rounded-xl border border-slate-800 bg-black/60 p-3 sm:h-36 md:h-auto md:min-h-0 md:flex-1 md:shrink lg:h-auto">
                             <h3 className="mb-2 shrink-0 text-[10px] font-semibold tracking-[0.14em] text-slate-400 uppercase">
                                 Console
                             </h3>
@@ -700,11 +723,19 @@ export default function SimulationVisualizer() {
                                   }}
                                   style={{ position: 'fixed' }}
                                   className={cn(
-                                      'rounded-xl border bg-bg-block-strong px-3 py-2 text-xs text-text-primary shadow-xl',
+                                      'rounded-xl border bg-bg-block-strong px-2 py-1.5 text-[11px] text-text-primary shadow-xl sm:px-3 sm:py-2 sm:text-xs',
+                                      'flex items-center gap-2',
                                       getTaskBorderClasses(f.task.source),
                                   )}
                               >
-                                  {f.task.label}
+                                  <div className="flex flex-col">
+                                      <span className="leading-snug">{f.task.label}</span>
+                                      {getTaskSubtitle(f.task) ? (
+                                          <span className="mt-0.5 text-[8px] font-medium tracking-wide text-slate-400 uppercase sm:text-[9px]">
+                                              {getTaskSubtitle(f.task)}
+                                          </span>
+                                      ) : null}
+                                  </div>
                               </motion.div>
                           ))}
                       </div>,
@@ -756,7 +787,7 @@ export default function SimulationVisualizer() {
                                           </button>
                                       </div>
 
-                                      <div className="min-h-0 flex-1 overflow-auto p-2">
+                                      <div className="program-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-2">
                                           {visibleSteps.length === 0 ? (
                                               <div className="p-3 text-sm text-text-muted">
                                                   Gere a simulação para ver o histórico.
