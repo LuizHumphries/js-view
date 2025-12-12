@@ -4,13 +4,20 @@ import TaskCard from './TaskCard'
 
 type JsEngineProcessorProps = {
     currentTask: SimulationTask | null
+    isHoldingTask?: boolean
+    holdingTask?: SimulationTask | null
 }
 
-export default function JsEngineProcessor({ currentTask }: JsEngineProcessorProps) {
+export default function JsEngineProcessor({
+    currentTask,
+    isHoldingTask = false,
+    holdingTask = null,
+}: JsEngineProcessorProps) {
     const isProcessing = currentTask !== null
 
     return (
         <div
+            data-sim-js-engine="true"
             className={cn(
                 'relative flex min-h-[80px] flex-col items-center justify-center gap-2',
                 'rounded-xl border border-slate-700 bg-bg-panel px-4 py-3',
@@ -24,14 +31,18 @@ export default function JsEngineProcessor({ currentTask }: JsEngineProcessorProp
                     )}
                 />
                 <span className="text-[10px] font-semibold tracking-widest text-slate-400 uppercase">
-                    JS Engine
+                    Motor JS
                 </span>
             </div>
 
             {currentTask ? (
-                <TaskCard task={currentTask} isWaiting={false} />
+                <TaskCard task={currentTask} isWaiting={false} zoneId="engine" />
+            ) : holdingTask ? (
+                <TaskCard task={holdingTask} isWaiting={false} zoneId="engine" isHidden={true} />
             ) : (
-                <span className="text-xs text-slate-500 italic opacity-50">Aguardando...</span>
+                <span className="text-xs text-slate-500 italic opacity-50">
+                    {isHoldingTask ? 'Recebendo do timeline...' : 'Aguardando...'}
+                </span>
             )}
         </div>
     )

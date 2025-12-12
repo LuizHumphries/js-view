@@ -21,7 +21,10 @@ export type SimulationState = {
     status: SimulationStatus
     playback: {
         autoplay: boolean
-        speedMs: number
+    }
+    ui: {
+        // Duração da animação de deslocamento entre zonas (ms)
+        transferAnimMs: number
     }
     builtHash: string | null
     builtBlocks: BlockBuilted[]
@@ -33,7 +36,10 @@ const initialState: SimulationState = {
     status: 'idle',
     playback: {
         autoplay: false,
-        speedMs: 1500,
+    },
+    ui: {
+        // default: mais lento permitido (para ficar bem visível)
+        transferAnimMs: 2000,
     },
     builtHash: null,
     builtBlocks: [],
@@ -122,16 +128,10 @@ const simulationSlice = createSlice({
         pause(state) {
             state.status = 'paused'
         },
-        setSpeedMs(state, action: PayloadAction<number>) {
-            const speedMs = action.payload
-            if (speedMs <= 0) {
-                state.status = 'paused'
-                state.playback.autoplay = false
-                state.playback.speedMs = 0
-                return
-            }
-
-            state.playback.speedMs = speedMs
+        setTransferAnimMs(state, action: PayloadAction<number>) {
+            const ms = action.payload
+            const clamped = Math.min(Math.max(ms, 150), 2000)
+            state.ui.transferAnimMs = clamped
         },
     },
 })
@@ -147,6 +147,6 @@ export const {
     pause,
     play,
     prevStep,
-    setSpeedMs,
+    setTransferAnimMs,
 } = simulationSlice.actions
 export const simulationReducer = simulationSlice.reducer
