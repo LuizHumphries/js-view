@@ -1,6 +1,7 @@
 import type { BlockDefinition } from '../blocks/types'
 import { getConsoleMessagesForBlock } from './LogMessage'
 import type { ProgramBlockInstance } from './types'
+import { getTimeoutDelayMs } from '../simulation/compileBlocksToOps'
 
 export function sequenceToLabel(sequence: number): string {
     let label = ''
@@ -69,7 +70,12 @@ export function generateProgramCode(
             }
             case 'timeout': {
                 const [msg] = messages
-                lines.push(`setTimeout(() => {`, `   console.log("${msg}");`, ` }, 1);\n`)
+                const delayMs = getTimeoutDelayMs(instance.sequence)
+                lines.push(
+                    `setTimeout(() => {`,
+                    `   console.log("${msg}");`,
+                    `}, ${delayMs});\n`,
+                )
                 break
             }
         }

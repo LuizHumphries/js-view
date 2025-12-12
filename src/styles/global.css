@@ -33,6 +33,8 @@
   --color-zone-microtask: hsl(280, 70%, 68%);
   --color-zone-macrotask: hsl(32, 90%, 58%);
   --color-zone-webapi: hsl(174, 60%, 50%);
+  --color-zone-engine: hsl(174, 60%, 50%);;
+  --color-zone-timeline: hsl(174, 60%, 50%);;
 
   --shadow-card-soft: 0 4px 16px hsla(40, 30%, 4%, 0.5);
 
@@ -41,6 +43,7 @@
   --shadow-glow-timeout: 0 0 12px hsla(25, 85%, 62%, 0.3);
   --shadow-glow-promiseThen: 0 0 12px hsla(262, 80%, 72%, 0.3);
   --shadow-glow-asyncAwait: 0 0 12px hsla(330, 75%, 65%, 0.3);
+  --shadow-glow-engine: 0 0 12px hsla(330, 75%, 65%, 0.3);
 
   --shadow-glow-success: 0 0 14px hsla(142, 70%, 55%, 0.35);
   --shadow-glow-warning: 0 0 14px hsla(47, 85%, 55%, 0.35);
@@ -149,4 +152,18 @@ body {
 
 .animate-breathe {
   animation: breathe 3s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s ease-in-out infinite;
 }

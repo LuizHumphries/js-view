@@ -1,8 +1,19 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
 import type { SimulationStep } from '../../domain/simulation/types'
+import type { BlockType } from '../../domain/blocks/types'
 
 export type SimulationStatus = 'idle' | 'ready' | 'running' | 'paused' | 'finished'
+
+export type BlockBuilted = {
+    instanceId: string
+    blockId: string
+    definition: {
+        id: BlockType
+        title: string
+        type: BlockType
+    }
+}
 
 export type SimulationState = {
     steps: SimulationStep[]
@@ -13,6 +24,7 @@ export type SimulationState = {
         speedMs: number
     }
     builtHash: string | null
+    builtBlocks: BlockBuilted[]
 }
 
 const initialState: SimulationState = {
@@ -21,20 +33,29 @@ const initialState: SimulationState = {
     status: 'idle',
     playback: {
         autoplay: false,
-        speedMs: 1000,
+        speedMs: 1500,
     },
     builtHash: null,
+    builtBlocks: [],
 }
 
 const simulationSlice = createSlice({
     name: 'simulation',
     initialState,
     reducers: {
-        setSteps(state, action: PayloadAction<{ steps: SimulationStep[]; blockHash: string }>) {
+        setSteps(
+            state,
+            action: PayloadAction<{
+                steps: SimulationStep[]
+                blockHash: string
+                blocks: SimulationState['builtBlocks']
+            }>,
+        ) {
             state.steps = action.payload.steps
             state.currentStepIndex = 0
             state.status = state.steps.length ? 'ready' : 'idle'
             state.builtHash = action.payload.blockHash
+            state.builtBlocks = action.payload.blocks
         },
         resetSimulation() {
             return initialState

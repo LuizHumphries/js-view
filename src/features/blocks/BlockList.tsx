@@ -11,10 +11,10 @@ export default function BlockList() {
         <section className="flex flex-col">
             <header className="flex flex-col items-center gap-2 rounded-t-xl bg-bg-block-hover px-5 py-1 text-center">
                 <h2 className="font-bold tracking-wide text-text-primary uppercase">
-                    Available blocks
+                    Blocos disponíveis
                 </h2>
                 <span className="text-sm tracking-wide text-text-muted uppercase">
-                    (Click to select)
+                    (Clique para adicionar)
                 </span>
             </header>
             <main className="flex h-full w-68 flex-col items-center gap-4 rounded-b-xl bg-bg-block p-5">

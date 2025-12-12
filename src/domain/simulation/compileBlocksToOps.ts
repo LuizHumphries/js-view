@@ -1,12 +1,17 @@
-import { sequenceToLabel } from '../program/codegen'
+import { sequenceToLabel } from '../program/CodeGen'
 import type { ProgramBlockInstance } from '../program/types'
 import type { SimulationOp } from './ops'
+
+export function getTimeoutDelayMs(_sequence: number): number {
+    return 1000
+}
 
 export function compileBlocksToOps(instances: ProgramBlockInstance[]): SimulationOp[] {
     const ops: SimulationOp[] = []
 
     for (const instance of instances) {
         const label = sequenceToLabel(instance.sequence)
+        const blockInstanceId = instance.instanceId
 
         switch (instance.blockId) {
             case 'console': {
@@ -14,6 +19,7 @@ export function compileBlocksToOps(instances: ProgramBlockInstance[]): Simulatio
                     kind: 'syncLog',
                     message: label,
                     source: 'console',
+                    blockInstanceId,
                 })
                 break
             }
@@ -22,13 +28,15 @@ export function compileBlocksToOps(instances: ProgramBlockInstance[]): Simulatio
                 ops.push(
                     {
                         kind: 'syncLog',
-                        message: `For Loop: ${label} 1`,
+                        message: `For Loop: ${label} 0`,
                         source: 'forLoop',
+                        blockInstanceId,
                     },
                     {
                         kind: 'syncLog',
-                        message: `For Loop: ${label} 2`,
+                        message: `For Loop: ${label} 1`,
                         source: 'forLoop',
+                        blockInstanceId,
                     },
                 )
                 break
@@ -40,11 +48,13 @@ export function compileBlocksToOps(instances: ProgramBlockInstance[]): Simulatio
                         kind: 'syncLog',
                         message: `PRE await ${label}`,
                         source: 'asyncAwait',
+                        blockInstanceId,
                     },
                     {
                         kind: 'scheduleMicrotask',
                         message: `POST await ${label}`,
                         source: 'asyncAwait',
+                        blockInstanceId,
                     },
                 )
                 break
@@ -52,18 +62,28 @@ export function compileBlocksToOps(instances: ProgramBlockInstance[]): Simulatio
 
             case 'promiseThen': {
                 ops.push({
+                    kind: 'promiseResolve',
+                    source: 'promiseThen',
+                    blockInstanceId,
+                })
+
+                ops.push({
                     kind: 'scheduleMicrotask',
                     message: `Promise ${label}`,
                     source: 'promiseThen',
+                    blockInstanceId,
                 })
                 break
             }
 
             case 'timeout': {
+                const delayMs = getTimeoutDelayMs(instance.sequence)
                 ops.push({
                     kind: 'scheduleMacrotask',
                     message: `setTimeout ${label}`,
                     source: 'timeout',
+                    blockInstanceId,
+                    delayMs,
                 })
                 break
             }

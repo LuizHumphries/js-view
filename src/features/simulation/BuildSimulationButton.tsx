@@ -1,7 +1,7 @@
 import { LucideArrowDown } from 'lucide-react'
 import { buildSimulation } from '../../domain/simulation/buildSimulation'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { selectProgramBlocks } from '../program/programSlice'
+import { selectProgramBlocks, selectProgramBlocksWithDefinitions } from '../program/programSlice'
 import { setSteps } from './simulationSlice'
 import { cn } from '../../utils/cn'
 import { Fragment } from 'react/jsx-runtime'
@@ -17,10 +17,21 @@ export default function BuildSimulationButton({
 }: BuildSimulationButtonProps) {
     const dispatch = useAppDispatch()
     const blocks = useAppSelector(selectProgramBlocks)
+    const blocksWithDefs = useAppSelector(selectProgramBlocksWithDefinitions)
 
     const handleBuild = () => {
         const steps = buildSimulation(blocks)
-        dispatch(setSteps({ steps, blockHash: currentBlockHash }))
+
+        const builtBlocks = blocksWithDefs.map((b) => ({
+            instanceId: b.instanceId,
+            blockId: b.blockId,
+            definition: {
+                id: b.definition.id,
+                title: b.definition.title,
+                type: b.definition.type,
+            },
+        }))
+        dispatch(setSteps({ steps, blockHash: currentBlockHash, blocks: builtBlocks }))
     }
 
     return (
