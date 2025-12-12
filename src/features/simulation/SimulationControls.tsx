@@ -186,6 +186,46 @@ export default function SimulationControls({ simulation }: SimulationControlsPro
                     </div>
                 </div>
 
+                {/* Desktop (md+): Velocidade + Loop na MESMA linha do topo */}
+                <div className="ml-auto hidden items-center gap-3 md:flex">
+                    <div className="h-6 w-px bg-border-subtle/60" />
+
+                    <div className="flex min-w-0 items-center gap-2 md:min-w-[220px]">
+                        <span className="shrink-0 text-[10px] text-text-primary">Veloc.</span>
+                        <Slider.Root
+                            min={0}
+                            max={100}
+                            step={5}
+                            value={[transferSliderValue]}
+                            onValueChange={(value) => {
+                                const v = Array.isArray(value) ? value[0] : value
+                                dispatch(setTransferAnimSpeed(v))
+                            }}
+                            className="flex flex-1 items-center"
+                        >
+                            <Slider.Control className="w-full px-1">
+                                <Slider.Track className="relative h-1 w-full rounded-full bg-bg-block-strong">
+                                    <Slider.Indicator className="absolute inset-y-0 left-0 rounded-full bg-accent-gold" />
+                                    <Slider.Thumb className="absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border border-border-subtle bg-bg-panel shadow-card-soft outline-none focus-visible:ring-2 focus-visible:ring-accent-gold/60" />
+                                </Slider.Track>
+                            </Slider.Control>
+                        </Slider.Root>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-text-primary">Loop</span>
+                        <Switch.Root
+                            checked={simulation.playback.autoplay}
+                            onCheckedChange={(checked) => {
+                                dispatch(setPlayback({ autoplay: checked }))
+                            }}
+                            className="relative flex h-6 w-11 items-center rounded-full border border-border-subtle bg-bg-block-hover p-0.5 transition-colors data-checked:bg-accent-gold/20"
+                        >
+                            <Switch.Thumb className="h-5 w-5 rounded-full bg-bg-panel shadow-card-soft transition-transform duration-200 data-checked:translate-x-5" />
+                        </Switch.Root>
+                    </div>
+                </div>
+
                 {/* Botão abrir/fechar só no mobile (<md). Em md+ não existe toggle. */}
                 <div className="ml-auto md:hidden">
                     <Button
@@ -207,15 +247,9 @@ export default function SimulationControls({ simulation }: SimulationControlsPro
                 </div>
             </div>
 
-            {/* Toolbar extra: em md+ sempre visível; em mobile só aparece se isMoreOpen */}
-            <div className={cn('mt-1', 'md:mt-0')}>
-                <div
-                    className={cn(
-                        'hidden md:flex',
-                        isMoreOpen ? 'flex md:flex' : 'hidden md:flex',
-                        'w-full flex-col gap-2 md:flex-row md:items-center md:gap-2',
-                    )}
-                >
+            {/* Toolbar extra: somente mobile (<md) */}
+            <div className="mt-1 md:hidden">
+                <div className={cn(isMoreOpen ? 'flex' : 'hidden', 'w-full flex-col gap-2')}>
                     {/* Mobile pequeno (<sm): controles de step abaixo, ocupando 100% com espaçamento */}
                     <div className="flex w-full items-center justify-between gap-2 sm:hidden">
                         <Button
@@ -268,11 +302,9 @@ export default function SimulationControls({ simulation }: SimulationControlsPro
                         </Button>
                     </div>
 
-                    {/* Linha 2 (mobile): slider embaixo. md+: continua no mesmo row. */}
-                    <div className="flex w-full items-center gap-3 md:w-auto">
-                        <div className="hidden h-6 w-px bg-border-subtle/60 md:block" />
-
-                        <div className="flex w-full min-w-0 flex-1 items-center gap-2 md:min-w-[200px]">
+                    {/* Linha 2 (mobile): slider + loop */}
+                    <div className="flex w-full items-center gap-3">
+                        <div className="flex w-full min-w-0 flex-1 items-center gap-2">
                             <span className="shrink-0 text-[10px] text-text-primary">Veloc.</span>
                             <Slider.Root
                                 min={0}
