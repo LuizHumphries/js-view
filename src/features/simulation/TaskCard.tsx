@@ -10,6 +10,7 @@ type TaskCardProps = {
     zoneId?: string
     isHidden?: boolean
     exitAnimation?: 'none' | 'final'
+    exitDurationS?: number
 }
 
 function WaitingSpinner() {
@@ -47,6 +48,7 @@ export default function TaskCard({
     zoneId,
     isHidden = false,
     exitAnimation = 'none',
+    exitDurationS = 0.55,
 }: TaskCardProps) {
     const subtitle = getTaskSubtitle(task)
     const isTimer = task.kind === 'macroCallback' && task.source === 'timeout'
@@ -68,7 +70,7 @@ export default function TaskCard({
                           filter: ['none', 'grayscale(1)'],
                           backgroundColor: 'rgba(0, 0, 0, 0)',
                           borderColor: 'rgba(148, 163, 184, 0)',
-                          transition: { duration: 0.55, ease: 'easeOut' },
+                          transition: { duration: exitDurationS, ease: 'easeOut' },
                       }
                     : undefined
             }
