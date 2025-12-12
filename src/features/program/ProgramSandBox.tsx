@@ -28,22 +28,24 @@ export default function ProgramSandBox() {
     }
 
     return (
-        <section className="flex min-h-0 flex-1 flex-col">
-            <header className="flex flex-row items-center gap-2 rounded-t-xl bg-bg-block-hover px-5 py-1">
-                <h2 className="font-bold tracking-wide text-text-primary uppercase">
-                    Execution Thread
-                </h2>
-                <span className="text-sm tracking-wide text-text-muted uppercase">
-                    (Drag to Reorder)
-                </span>
-            </header>
-            <main className="program-scroll w-full flex-1 touch-pan-y overflow-y-auto scroll-smooth rounded-b-xl bg-bg-block [scrollbar-gutter:stable]">
+        <section className="flex h-full min-h-0 flex-1 flex-col rounded-xl bg-bg-block p-4">
+            <div className="mb-3 rounded-xl border border-dashed border-border-subtle bg-bg-panel/40 px-3 py-2">
+                <p className="text-xs text-text-muted">
+                    Sequência de execução: arraste os blocos para reorganizá-los.
+                </p>
+                <p className="mt-1 text-xs text-text-muted">
+                    Clique em <span className="font-semibold text-text-primary">Código</span> para
+                    verificar o código gerado.
+                </p>
+            </div>
+
+            <main className="program-scroll min-h-0 w-full flex-1 touch-pan-y overflow-y-auto scroll-smooth rounded-xl bg-bg-block [scrollbar-gutter:stable]">
                 <DndContext
                     onDragEnd={handleDragEnd}
                     modifiers={[restrictToVerticalAxis, restrictToParentElement]}
                 >
                     <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
-                        <div className="flex flex-col items-start gap-3 p-5">
+                        <div className="flex min-h-full w-full flex-col items-start gap-3 p-5">
                             {programBlocks.map((block) => {
                                 return (
                                     <SortableProgramBlock

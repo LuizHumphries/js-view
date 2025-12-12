@@ -27,6 +27,7 @@ const STEP_TIME_MS = 500
 export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
     const runtime = createInitialRuntime()
     const steps: SimulationStep[] = []
+    let previousOp: SimulationOp | null = null
 
     let nextTaskId = 1
     function createTask(
@@ -98,7 +99,7 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
                 const task = createTask(op.message, op.source, op.blockInstanceId, 'sync')
 
                 steps.push(
-                    snapshotState(`"${op.message}" entra no JS Engine.`, {
+                    snapshotState(`"${op.message}" entra no Motor JS.`, {
                         activeBlockInstanceId: op.blockInstanceId,
                         jsEngineTask: task,
                     }),
@@ -106,7 +107,7 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
 
                 runtime.callStack.push(task)
                 steps.push(
-                    snapshotState(`"${op.message}" entra na Call Stack.`, {
+                    snapshotState(`"${op.message}" entra na pilha de chamadas.`, {
                         activeBlockInstanceId: op.blockInstanceId,
                     }),
                 )
@@ -119,14 +120,19 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
                 )
 
                 runtime.callStack.pop()
-                steps.push(snapshotState('Call Stack esvaziada.'))
+                steps.push(
+                    snapshotState('Pilha de chamadas esvaziada.', {
+                        activeBlockInstanceId: op.blockInstanceId,
+                    }),
+                )
 
                 const expired = tickTimers()
                 for (const t of expired) {
                     runtime.macroTasks.push(t)
                     steps.push(
                         snapshotState(
-                            `Timer expirou! "${t.label}" entra na Macrotask Queue. (${t.delayMs}ms)`,
+                            `Timer expirou! "${t.label}" entra na fila de macrotasks. (${t.delayMs}ms)`,
+                            { activeBlockInstanceId: t.blockInstanceId },
                         ),
                     )
                 }
@@ -142,7 +148,7 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
                 )
 
                 steps.push(
-                    snapshotState('Promise.then entra no JS Engine.', {
+                    snapshotState('Promise.resolve() entra no Motor JS.', {
                         activeBlockInstanceId: op.blockInstanceId,
                         jsEngineTask: task,
                     }),
@@ -150,16 +156,22 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
 
                 runtime.callStack.push(task)
                 steps.push(
-                    snapshotState('Promise.resolve() entra na Call Stack.', {
+                    snapshotState('Promise.resolve() entra na pilha de chamadas.', {
                         activeBlockInstanceId: op.blockInstanceId,
                     }),
                 )
 
                 runtime.callStack.pop()
+                // IMPORTANTE: após resolver, o bloco ainda está "waiting"
+                // (o callback do .then será enfileirado como microtask e ainda não executou).
+                runtime.waitingBlockIds.add(op.blockInstanceId)
                 steps.push(
-                    snapshotState('Promise.resolve() executado. Preparando callback .then()...', {
-                        activeBlockInstanceId: op.blockInstanceId,
-                    }),
+                    snapshotState(
+                        'Promise.resolve() executado. Agendando callback do .then() na fila de microtasks...',
+                        {
+                            activeBlockInstanceId: op.blockInstanceId,
+                        },
+                    ),
                 )
 
                 const expired = tickTimers()
@@ -167,7 +179,8 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
                     runtime.macroTasks.push(t)
                     steps.push(
                         snapshotState(
-                            `Timer expirou! "${t.label}" entra na Macrotask Queue. (${t.delayMs}ms)`,
+                            `Timer expirou! "${t.label}" entra na fila de macrotasks. (${t.delayMs}ms)`,
+                            { activeBlockInstanceId: t.blockInstanceId },
                         ),
                     )
                 }
@@ -177,15 +190,24 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
             case 'scheduleMicrotask': {
                 const task = createTask(op.message, op.source, op.blockInstanceId, 'microCallback')
 
-                const lastStep = steps[steps.length - 1]
-                const isContinuation =
-                    lastStep &&
-                    (lastStep.description.includes('Preparando callback .then()') ||
-                        lastStep.description.includes('Call Stack esvaziada'))
+                const shouldSkipEngineForPromiseThen =
+                    op.source === 'promiseThen' &&
+                    previousOp?.kind === 'promiseResolve' &&
+                    previousOp.blockInstanceId === op.blockInstanceId
 
-                if (!isContinuation) {
+                const lastStep = steps[steps.length - 1]
+                const isContinuationByDescription =
+                    lastStep &&
+                    (lastStep.description.includes('Preparando callback do .then()') ||
+                        lastStep.description.includes('Pilha de chamadas esvaziada') ||
+                        lastStep.description.includes('Agendando callback do .then()'))
+
+                const shouldShowEngine =
+                    !shouldSkipEngineForPromiseThen && !isContinuationByDescription
+
+                if (shouldShowEngine) {
                     steps.push(
-                        snapshotState(`"${op.message}" entra no JS Engine.`, {
+                        snapshotState(`"${op.message}" entra no Motor JS.`, {
                             activeBlockInstanceId: op.blockInstanceId,
                             jsEngineTask: task,
                         }),
@@ -193,7 +215,7 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
 
                     runtime.callStack.push(task)
                     steps.push(
-                        snapshotState(`"${op.message}" entra na Call Stack.`, {
+                        snapshotState(`"${op.message}" entra na pilha de chamadas.`, {
                             activeBlockInstanceId: op.blockInstanceId,
                         }),
                     )
@@ -207,19 +229,24 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
                 const isPromise = op.source === 'promiseThen'
                 const isAwait = op.source === 'asyncAwait'
                 const desc = isPromise
-                    ? `Callback .then("${op.message}") entra na Microtask Queue.`
+                    ? `Callback do .then("${op.message}") entra na fila de microtasks.`
                     : isAwait
-                      ? `Continuação após await ("${op.message}") entra na Microtask Queue.`
-                      : `"${op.message}" entra na Microtask Queue.`
+                      ? `Continuação após await ("${op.message}") entra na fila de microtasks.`
+                      : `"${op.message}" entra na fila de microtasks.`
 
-                steps.push(snapshotState(desc))
+                steps.push(
+                    snapshotState(desc, {
+                        activeBlockInstanceId: op.blockInstanceId,
+                    }),
+                )
 
                 const expired = tickTimers()
                 for (const t of expired) {
                     runtime.macroTasks.push(t)
                     steps.push(
                         snapshotState(
-                            `Timer expirou! "${t.label}" entra na Macrotask Queue. (${t.delayMs}ms)`,
+                            `Timer expirou! "${t.label}" entra na fila de macrotasks. (${t.delayMs}ms)`,
+                            { activeBlockInstanceId: t.blockInstanceId },
                         ),
                     )
                 }
@@ -237,7 +264,7 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
 
                 steps.push(
                     snapshotState(
-                        `setTimeout("${op.message}", ${op.delayMs}ms) entra no JS Engine.`,
+                        `setTimeout("${op.message}", ${op.delayMs}ms) entra no Motor JS.`,
                         {
                             activeBlockInstanceId: op.blockInstanceId,
                             jsEngineTask: task,
@@ -247,7 +274,7 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
 
                 runtime.callStack.push(task)
                 steps.push(
-                    snapshotState(`setTimeout() entra na Call Stack.`, {
+                    snapshotState(`setTimeout() entra na pilha de chamadas.`, {
                         activeBlockInstanceId: op.blockInstanceId,
                     }),
                 )
@@ -257,7 +284,8 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
                 runtime.waitingBlockIds.add(op.blockInstanceId)
                 steps.push(
                     snapshotState(
-                        `Timer "${op.message}" registrado na Web API. Aguardando ${op.delayMs}ms...`,
+                        `Timer "${op.message}" registrado nas Web APIs. Aguardando ${op.delayMs}ms...`,
+                        { activeBlockInstanceId: op.blockInstanceId },
                     ),
                 )
 
@@ -266,13 +294,15 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
                     runtime.macroTasks.push(t)
                     steps.push(
                         snapshotState(
-                            `Timer expirou! "${t.label}" entra na Macrotask Queue. (${t.delayMs}ms)`,
+                            `Timer expirou! "${t.label}" entra na fila de macrotasks. (${t.delayMs}ms)`,
+                            { activeBlockInstanceId: t.blockInstanceId },
                         ),
                     )
                 }
                 break
             }
         }
+        previousOp = op
     }
 
     steps.push(snapshotState('Fim do código síncrono. Event Loop inicia.'))
@@ -286,27 +316,41 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
             const task = runtime.microTasks.shift()!
 
             steps.push(
-                snapshotState(`"${task.label}" sai da Microtask Queue.`, {
+                snapshotState(`"${task.label}" sai da fila de microtasks.`, {
                     transitingTask: task,
+                    activeBlockInstanceId: task.blockInstanceId,
                 }),
             )
 
             runtime.callStack.push(task)
-            steps.push(snapshotState(`"${task.label}" entra na Call Stack.`))
+            steps.push(
+                snapshotState(`"${task.label}" entra na pilha de chamadas.`, {
+                    activeBlockInstanceId: task.blockInstanceId,
+                }),
+            )
 
             runtime.consoleOutput.push(task.label)
-            steps.push(snapshotState(`Executando: console.log("${task.label}")`))
+            steps.push(
+                snapshotState(`Executando: console.log("${task.label}")`, {
+                    activeBlockInstanceId: task.blockInstanceId,
+                }),
+            )
 
             runtime.callStack.pop()
             runtime.waitingBlockIds.delete(task.blockInstanceId)
-            steps.push(snapshotState('Microtask concluída. Call Stack esvaziada.'))
+            steps.push(
+                snapshotState('Microtask concluída. Pilha de chamadas esvaziada.', {
+                    activeBlockInstanceId: task.blockInstanceId,
+                }),
+            )
 
             const expired = tickTimers()
             for (const t of expired) {
                 runtime.macroTasks.push(t)
                 steps.push(
                     snapshotState(
-                        `Timer expirou! "${t.label}" entra na Macrotask Queue. (${t.delayMs}ms)`,
+                        `Timer expirou! "${t.label}" entra na fila de macrotasks. (${t.delayMs}ms)`,
+                        { activeBlockInstanceId: t.blockInstanceId },
                     ),
                 )
             }
@@ -321,20 +365,26 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
                 const remaining = task.remainingMs
                 steps.push(
                     snapshotState(
-                        `Web API: Timer "${task.label}" aguardando... ${remaining}ms restantes.`,
+                        `Web APIs: Timer "${task.label}" aguardando... ${remaining}ms restantes.`,
+                        { activeBlockInstanceId: task.blockInstanceId },
                     ),
                 )
             }
 
             runtime.webApis.shift()
             steps.push(
-                snapshotState(`Timer expirou! "${task.label}" sai da Web API.`, {
+                snapshotState(`Timer expirou! "${task.label}" sai das Web APIs.`, {
                     transitingTask: task,
+                    activeBlockInstanceId: task.blockInstanceId,
                 }),
             )
 
             runtime.macroTasks.push(task)
-            steps.push(snapshotState(`"${task.label}" entra na Macrotask Queue.`))
+            steps.push(
+                snapshotState(`"${task.label}" entra na fila de macrotasks.`, {
+                    activeBlockInstanceId: task.blockInstanceId,
+                }),
+            )
             continue
         }
 
@@ -342,27 +392,41 @@ export function runOpsToSteps(ops: SimulationOp[]): SimulationStep[] {
             const task = runtime.macroTasks.shift()!
 
             steps.push(
-                snapshotState(`"${task.label}" sai da Macrotask Queue.`, {
+                snapshotState(`"${task.label}" sai da fila de macrotasks.`, {
                     transitingTask: task,
+                    activeBlockInstanceId: task.blockInstanceId,
                 }),
             )
 
             runtime.callStack.push(task)
-            steps.push(snapshotState(`"${task.label}" entra na Call Stack.`))
+            steps.push(
+                snapshotState(`"${task.label}" entra na pilha de chamadas.`, {
+                    activeBlockInstanceId: task.blockInstanceId,
+                }),
+            )
 
             runtime.consoleOutput.push(task.label)
-            steps.push(snapshotState(`Executando: console.log("${task.label}")`))
+            steps.push(
+                snapshotState(`Executando: console.log("${task.label}")`, {
+                    activeBlockInstanceId: task.blockInstanceId,
+                }),
+            )
 
             runtime.callStack.pop()
             runtime.waitingBlockIds.delete(task.blockInstanceId)
-            steps.push(snapshotState('Macrotask concluída. Call Stack esvaziada.'))
+            steps.push(
+                snapshotState('Macrotask concluída. Pilha de chamadas esvaziada.', {
+                    activeBlockInstanceId: task.blockInstanceId,
+                }),
+            )
 
             const expired = tickTimers()
             for (const t of expired) {
                 runtime.macroTasks.push(t)
                 steps.push(
                     snapshotState(
-                        `Timer expirou! "${t.label}" entra na Macrotask Queue. (${t.delayMs}ms)`,
+                        `Timer expirou! "${t.label}" entra na fila de macrotasks. (${t.delayMs}ms)`,
+                        { activeBlockInstanceId: t.blockInstanceId },
                     ),
                 )
             }

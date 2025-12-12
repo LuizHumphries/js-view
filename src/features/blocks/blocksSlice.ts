@@ -12,7 +12,7 @@ const initialState: BlocksState = {
             id: 'console',
             type: 'console',
             title: 'console.log',
-            description: 'Síncrono: entra na Call Stack, executa e sai.',
+            description: 'Síncrono: entra na pilha de chamadas, executa e sai.',
             category: 'sync',
             complexityLevel: 1,
             exampleCode: 'console.log("A");',
@@ -21,7 +21,7 @@ const initialState: BlocksState = {
             id: 'promiseThen',
             type: 'promiseThen',
             title: 'Promise.resolve().then()',
-            description: 'Resolve a Promise agora e agenda o .then na Microtask Queue.',
+            description: 'Resolve a Promise agora e agenda o .then na fila de microtasks.',
             category: 'microtask',
             complexityLevel: 1,
             exampleCode: 'Promise.resolve("A").then(() => console.log("Promise A"));',
@@ -29,8 +29,8 @@ const initialState: BlocksState = {
         {
             id: 'forLoop',
             type: 'forLoop',
-            title: 'For Loop',
-            description: 'Síncrono: roda o loop e empilha cada iteração na Call Stack.',
+            title: 'Laço for',
+            description: 'Síncrono: roda o loop e empilha cada iteração na pilha de chamadas.',
             category: 'loop',
             complexityLevel: 1,
             exampleCode: 'for (let i = 0; i < 3; i++) { console.log(i); }',
@@ -40,7 +40,7 @@ const initialState: BlocksState = {
             type: 'timeout',
             title: 'setTimeout',
             description:
-                'Registra na Web API e depois entra na Macrotask Queue quando o timer expira.',
+                'Registra nas Web APIs e depois entra na fila de macrotasks quando o timer expira.',
             category: 'macrotask',
             complexityLevel: 1,
             exampleCode: 'setTimeout(() => { console.log("Timeout A"); }, 0);',
@@ -48,8 +48,8 @@ const initialState: BlocksState = {
         {
             id: 'asyncAwait',
             type: 'asyncAwait',
-            title: 'Async Await',
-            description: 'Executa até o await e agenda a continuação na Microtask Queue.',
+            title: 'async/await',
+            description: 'Executa até o await e agenda a continuação na fila de microtasks.',
             category: 'microtask',
             complexityLevel: 1,
             exampleCode:

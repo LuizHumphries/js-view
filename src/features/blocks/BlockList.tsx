@@ -3,24 +3,45 @@ import { addProgramBlock } from '../program/programSlice'
 import { selectBlockDefinitions } from './blocksSlice'
 import Block from '../../components/block/Block'
 
-export default function BlockList() {
+type BlockListProps = {
+    fullWidth?: boolean
+    showHeader?: boolean
+    onBlockAdded?: () => void
+}
+
+export default function BlockList({
+    fullWidth = false,
+    showHeader = true,
+    onBlockAdded,
+}: BlockListProps) {
     const blocks = useAppSelector(selectBlockDefinitions)
     const dispatch = useAppDispatch()
 
     return (
         <section className="flex flex-col">
-            <header className="flex flex-col items-center gap-2 rounded-t-xl bg-bg-block-hover px-5 py-1 text-center">
-                <h2 className="font-bold tracking-wide text-text-primary uppercase">
-                    Blocos disponíveis
-                </h2>
-                <span className="text-sm tracking-wide text-text-muted uppercase">
-                    (Clique para adicionar)
-                </span>
-            </header>
-            <main className="flex h-full w-68 flex-col items-center gap-4 rounded-b-xl bg-bg-block p-5">
+            {showHeader && (
+                <header className="flex flex-col items-center gap-2 rounded-t-xl bg-bg-block-hover px-5 py-1 text-center">
+                    <h2 className="font-bold tracking-wide text-text-primary uppercase">
+                        Blocos disponíveis
+                    </h2>
+                    <span className="text-sm tracking-wide text-text-muted uppercase">
+                        (Clique para adicionar)
+                    </span>
+                </header>
+            )}
+            <main
+                className={[
+                    'flex h-full w-full flex-col gap-4 bg-bg-block p-5',
+                    showHeader ? 'rounded-b-xl' : 'rounded-xl',
+                    fullWidth ? 'items-stretch' : 'items-center sm:w-68',
+                ].join(' ')}
+            >
                 {blocks.map((block) => (
                     <Block
-                        onClick={() => dispatch(addProgramBlock(block.id))}
+                        onClick={() => {
+                            dispatch(addProgramBlock(block.id))
+                            onBlockAdded?.()
+                        }}
                         definition={block}
                         key={block.id}
                     />

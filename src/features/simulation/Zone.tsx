@@ -1,4 +1,3 @@
-import { LayoutGroup } from 'framer-motion'
 import { cn } from '../../utils/cn'
 
 type ZoneVariant = 'callstack' | 'microtask' | 'webapi' | 'macrotask'
@@ -29,8 +28,9 @@ export default function Zone({ title, variant = 'callstack', children }: ZonePro
     return (
         <section
             className={cn(
-                'flex w-56 flex-col rounded-2xl border border-border-subtle bg-bg-panel p-3',
-                'min-h-[140px]',
+                'flex w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border-subtle bg-bg-panel p-2 sm:p-3',
+                // Altura mais flexível em telas menores (evita “atochar” o motor JS / console).
+                'min-h-[72px] sm:min-h-[110px]',
                 variantStyle,
             )}
         >
@@ -44,9 +44,9 @@ export default function Zone({ title, variant = 'callstack', children }: ZonePro
                     {title}
                 </h3>
             </header>
-            <LayoutGroup>
-                <div className="flex flex-1 flex-col gap-2">{children}</div>
-            </LayoutGroup>
+            <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto sm:gap-2">
+                {children}
+            </div>
         </section>
     )
 }

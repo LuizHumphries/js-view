@@ -56,10 +56,14 @@ html,
 body,
 #root {
     height: 100%;
+    width: 100%;
 }
 
 body {
     margin: 0;
+    /* Regra global do app: nunca permitir scroll da página inteira.
+       Scroll deve acontecer apenas dentro de painéis (program-scroll, etc). */
+    overflow: hidden;
 }
 
 .program-scroll {

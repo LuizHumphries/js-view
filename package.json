@@ -12,7 +12,7 @@
         "lint": "eslint .",
         "preview": "vite preview",
         "start": "vite",
-        "test": "vitest --run",
+        "test": "vitest --run --passWithNoTests",
         "type-check": "tsc -b --noEmit"
     },
     "dependencies": {
