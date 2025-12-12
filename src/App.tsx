@@ -28,6 +28,8 @@ function AppInner() {
 
     const toast = Toast.useToastManager()
 
+    const isCodeDocked = isMdUp && panelTab === 'montagem'
+
     useEffect(() => {
         if (typeof window === 'undefined') return
         if (!('matchMedia' in window)) return
@@ -38,15 +40,29 @@ function AppInner() {
         return () => mql.removeEventListener('change', onChange)
     }, [])
 
+    useEffect(() => {
+        // Se o código está "dockado" (md+ em montagem), garantimos que o modal não fique aberto.
+        if (isCodeDocked) setIsCodeOpen(false)
+    }, [isCodeDocked])
+
     const panelNode = useMemo(() => {
         switch (panelTab) {
             case 'montagem':
-                return <ProgramSandBox />
+                return isMdUp ? (
+                    <div className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_392px] gap-3">
+                        <ProgramSandBox />
+                        <section className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-border-subtle bg-bg-panel p-3">
+                            <GeneratedCodePanel />
+                        </section>
+                    </div>
+                ) : (
+                    <ProgramSandBox />
+                )
             case 'execucao':
             default:
                 return <SimulationVisualizer />
         }
-    }, [panelTab])
+    }, [isMdUp, panelTab])
 
     return (
         <div className="flex min-h-dvh w-full overflow-x-hidden bg-bg-app p-2 sm:p-2 lg:h-dvh lg:overflow-hidden">
@@ -136,13 +152,15 @@ function AppInner() {
                             Blocos
                         </Button>
 
-                        <Button
-                            type="button"
-                            onClick={() => setIsCodeOpen(true)}
-                            className="rounded-md bg-bg-block px-3 py-1.5 text-sm whitespace-nowrap text-text-primary"
-                        >
-                            Código
-                        </Button>
+                        {!isCodeDocked ? (
+                            <Button
+                                type="button"
+                                onClick={() => setIsCodeOpen(true)}
+                                className="rounded-md bg-bg-block px-3 py-1.5 text-sm whitespace-nowrap text-text-primary"
+                            >
+                                Código
+                            </Button>
+                        ) : null}
                     </div>
                 </div>
 
