@@ -1,4 +1,4 @@
-import { sequenceToLabel } from './CodeGen'
+import { sequenceToLabel } from './sequenceUtils'
 import type { ProgramBlockInstance } from './types'
 
 export function getConsoleMessagesForBlock(instance: ProgramBlockInstance): string[] {

@@ -1,4 +1,4 @@
-import { sequenceToLabel } from '../program/CodeGen'
+import { sequenceToLabel } from '../program/sequenceUtils'
 import type { ProgramBlockInstance } from '../program/types'
 import type { SimulationOp } from './ops'
 

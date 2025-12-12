@@ -2,16 +2,10 @@ import type { BlockDefinition } from '../blocks/types'
 import { getConsoleMessagesForBlock } from './LogMessage'
 import type { ProgramBlockInstance } from './types'
 import { getTimeoutDelayMs } from '../simulation/compileBlocksToOps'
+import { sequenceToLabel } from './sequenceUtils'
 
-export function sequenceToLabel(sequence: number): string {
-    let label = ''
-
-    while (sequence >= 0) {
-        label = String.fromCharCode(65 + (sequence % 26)) + label
-        sequence = Math.floor(sequence / 26) - 1
-    }
-    return label
-}
+// Re-export for backward compatibility
+export { sequenceToLabel }
 
 export function generateProgramCode(
     instances: ProgramBlockInstance[],
