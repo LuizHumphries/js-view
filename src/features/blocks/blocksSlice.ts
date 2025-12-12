@@ -29,7 +29,7 @@ const initialState: BlocksState = {
         {
             id: 'forLoop',
             type: 'forLoop',
-            title: 'Laço for',
+            title: 'For Loop',
             description: 'Síncrono: roda o loop e empilha cada iteração na pilha de chamadas.',
             category: 'loop',
             complexityLevel: 1,
