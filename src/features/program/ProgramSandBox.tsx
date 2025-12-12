@@ -72,8 +72,10 @@ export default function ProgramSandBox() {
                     Sequência de execução: arraste os blocos para reorganizá-los.
                 </p>
                 <p className="mt-1 text-xs text-text-muted">
-                    Clique em <span className="font-semibold text-text-primary">Código</span> para
-                    verificar o código gerado.
+                    No desktop, o <span className="font-semibold text-text-primary">Código</span>{' '}
+                    fica aberto ao lado. No mobile, clique em{' '}
+                    <span className="font-semibold text-text-primary">Código</span> para verificar o
+                    código gerado.
                 </p>
             </div>
 
