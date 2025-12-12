@@ -50,6 +50,7 @@ export default function SimulationVisualizer() {
     const transitionCycleClosedRef = useRef(false)
     const flightHiddenIdsRef = useRef<Set<string>>(new Set())
     const zoneFlightRemainingRef = useRef(0)
+    const callStackExitPendingRef = useRef(false)
 
     const lastEngineTaskIdRef = useRef<string | null>(null)
     const prevStepIndexRef = useRef<number>(currentStepIndex)
@@ -141,8 +142,30 @@ export default function SimulationVisualizer() {
         animationsInFlightRef.current = 0
         flightHiddenIdsRef.current = new Set()
         zoneFlightRemainingRef.current = 0
+        callStackExitPendingRef.current = false
         shouldAutoAdvanceRef.current = status === 'running' && shouldAnimate
         transitionStepRef.current = shouldAutoAdvanceRef.current ? currentStepIndex : null
+
+        // Include Call Stack exit animations in the same "speed controls the full flow" cycle.
+        // If the previous step had call stack items that are gone in the current step,
+        // AnimatePresence keeps them in the DOM until exit completes — we must wait for that too.
+        if (shouldAutoAdvanceRef.current) {
+            const prev = steps[currentStepIndex - 1]
+            const curr = steps[currentStepIndex]
+            if (prev && curr) {
+                const prevIds = new Set(prev.callStack.map((t) => t.id))
+                const currIds = new Set(curr.callStack.map((t) => t.id))
+                let removedCount = 0
+                prevIds.forEach((id) => {
+                    if (!currIds.has(id)) removedCount += 1
+                })
+                if (removedCount > 0) {
+                    callStackExitPendingRef.current = true
+                    // We wait for "all exits completed" (single completion signal).
+                    registerAnimations(1)
+                }
+            }
+        }
 
         if (!shouldAnimate) {
             prevDomTasksRef.current = new Map()
@@ -528,7 +551,14 @@ export default function SimulationVisualizer() {
                             <div className="flex min-h-0 min-w-0 flex-col lg:overflow-hidden">
                                 <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
                                     <Zone title="Call Stack">
-                                        <AnimatePresence initial={false}>
+                                        <AnimatePresence
+                                            initial={false}
+                                            onExitComplete={() => {
+                                                if (!callStackExitPendingRef.current) return
+                                                callStackExitPendingRef.current = false
+                                                completeOneAnimation()
+                                            }}
+                                        >
                                             {currentStep?.callStack.map((task) => {
                                                 const nextStep = steps[currentStepIndex + 1]
                                                 const isRemovedNext =
@@ -546,6 +576,7 @@ export default function SimulationVisualizer() {
                                                         exitAnimation={
                                                             isRemovedNext ? 'final' : 'none'
                                                         }
+                                                        exitDurationS={transferAnimDurationS}
                                                     />
                                                 )
                                             })}
