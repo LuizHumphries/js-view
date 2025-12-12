@@ -1,15 +1,11 @@
 import type { BlockDefinition } from '../blocks/types'
+import { getConsoleMessagesForBlock } from './LogMessage'
 import type { ProgramBlockInstance } from './types'
+import { getTimeoutDelayMs } from '../simulation/compileBlocksToOps'
+import { sequenceToLabel } from './sequenceUtils'
 
-function sequenceToLabel(sequence: number): string {
-    let label = ''
-
-    while (sequence >= 0) {
-        label = String.fromCharCode(65 + (sequence % 26)) + label
-        sequence = Math.floor(sequence / 26) - 1
-    }
-    return label
-}
+// Re-export for backward compatibility
+export { sequenceToLabel }
 
 export function generateProgramCode(
     instances: ProgramBlockInstance[],
@@ -29,42 +25,53 @@ export function generateProgramCode(
 
     for (const { instance, definition } of blocksWithDef) {
         const label = sequenceToLabel(instance.sequence)
+        const messages = getConsoleMessagesForBlock(instance)
 
         switch (definition.type) {
-            case 'console':
-                lines.push(`console.log("${label}");\n`)
+            case 'console': {
+                const [msg] = messages
+                lines.push(`console.log("${msg}");\n`)
                 break
-            case 'forLoop':
+            }
+            case 'forLoop': {
                 lines.push(
                     `for (let i = 0; i < 2; i++) {`,
-                    `   console.log("For Loop: ${label}");`,
+                    `   console.log(\`For Loop: ${label} \${i}\`);`,
                     `}\n`,
                 )
                 break
-            case 'asyncAwait':
+            }
+            case 'asyncAwait': {
+                const [preMsg, postMsg] = messages
                 lines.push(
                     `async function run${label}() {`,
-                    `  console.log("PRE await ${label}");`,
-                    `  await someFunction${label}();`,
-                    `  console.log("POST await ${label}");`,
+                    `  console.log("${preMsg}");`,
+                    `  await null;`,
+                    `  console.log("${postMsg}");`,
                     `}\n`,
                     `run${label}();\n`,
                 )
                 break
-            case 'promiseThen':
+            }
+            case 'promiseThen': {
+                const [msg] = messages
                 lines.push(
                     `Promise.resolve("_").then(() => {`,
-                    `   console.log("Promise ${label}");`,
+                    `   console.log("${msg}");`,
                     `});\n`,
                 )
                 break
-            case 'timeout':
+            }
+            case 'timeout': {
+                const [msg] = messages
+                const delayMs = getTimeoutDelayMs(instance.sequence)
                 lines.push(
                     `setTimeout(() => {`,
-                    `   console.log("setTimeout ${label}");`,
-                    ` }, 1);\n`,
+                    `   console.log("${msg}");`,
+                    `}, ${delayMs});\n`,
                 )
                 break
+            }
         }
     }
     return lines.join('\n')

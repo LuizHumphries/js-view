@@ -1,4 +1,4 @@
-import { generateProgramCode } from '../../domain/program/codegen'
+import { generateProgramCode } from '../../domain/program/CodeGen'
 import { useAppSelector } from '../../store/hooks'
 import { selectBlockDefinitions } from '../blocks/blocksSlice'
 import { selectProgramBlocks } from '../program/programSlice'
@@ -13,21 +13,21 @@ export default function GeneratedCodePanel() {
     const code = generateProgramCode(instances, definitions)
 
     return (
-        <section className="flex flex-col">
-            <div className="flex flex-row items-center gap-2 rounded-t-xl bg-bg-block-hover px-5 py-1">
+        <section className="flex min-h-0 flex-1 flex-col">
+            <header className="flex flex-row items-center gap-2 rounded-t-xl bg-bg-block-hover px-5 py-1">
                 <h2 className="font-bold tracking-wide text-text-primary uppercase">
                     Generated Code
                 </h2>
                 <span className="text-sm tracking-wide text-text-muted uppercase">(Read only)</span>
-            </div>
-            <div className="program-scroll h-95 w-full overflow-y-auto scroll-smooth bg-bg-block">
+            </header>
+            <main className="program-scroll w-full flex-1 overflow-y-auto scroll-smooth rounded-b-xl bg-bg-block [scrollbar-gutter:stable]">
                 <SyntaxHighlighter
                     language="javascript"
                     showLineNumbers
                     style={xonokai}
                     customStyle={{
                         margin: 0,
-                        backgroundColor: '#111827',
+                        backgroundColor: 'var(--bg-block)',
                         padding: '0.75rem',
                         borderWidth: 0,
                         borderTopRightRadius: 0,
@@ -37,7 +37,7 @@ export default function GeneratedCodePanel() {
                 >
                     {code}
                 </SyntaxHighlighter>
-            </div>
+            </main>
         </section>
     )
 }

@@ -20,11 +20,17 @@ export default function Block({
     const Icon = visual.icon
 
     return (
-        <div className={cn('rounded-xl p-px', visual.borderGradientClass, visual.glowShadowClass)}>
+        <div
+            className={cn(
+                'w-full rounded-xl p-px',
+                visual.borderGradientClass,
+                visual.glowShadowClass,
+            )}
+        >
             <Button
                 onClick={onClick}
                 className={cn(
-                    'flex w-56 cursor-pointer flex-col items-start gap-2 overflow-hidden p-2',
+                    'flex w-full cursor-pointer flex-col items-start gap-2 overflow-hidden p-2',
                 )}
             >
                 <div className="flex flex-row items-center gap-2">
@@ -36,7 +42,7 @@ export default function Block({
                     >
                         <Icon className="h-4 w-4" />
                     </div>
-                    <span className="text-white">{definition.title}</span>
+                    <span className="text-sm text-white">{definition.title}</span>
                 </div>
                 {hasCodeDefinition && (
                     <code
