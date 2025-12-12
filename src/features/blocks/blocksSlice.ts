@@ -39,7 +39,8 @@ const initialState: BlocksState = {
             id: 'timeout',
             type: 'timeout',
             title: 'setTimeout',
-            description: 'Registra na Web API e depois entra na Macrotask Queue quando o timer expira.',
+            description:
+                'Registra na Web API e depois entra na Macrotask Queue quando o timer expira.',
             category: 'macrotask',
             complexityLevel: 1,
             exampleCode: 'setTimeout(() => { console.log("Timeout A"); }, 0);',

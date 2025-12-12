@@ -5,7 +5,6 @@ import type { ReactNode } from 'react'
 
 export type TimelineState = 'pending' | 'active' | 'waiting' | 'completed'
 
-
 export function getTaskBorderClasses(source: BlockType): string {
     return cn(
         source === 'console' && 'border-accent-console shadow-glow-console',
@@ -14,10 +13,9 @@ export function getTaskBorderClasses(source: BlockType): string {
         source === 'asyncAwait' && 'border-accent-asyncAwait shadow-glow-asyncAwait',
         source === 'promiseThen' && 'border-accent-promiseThen shadow-glow-promiseThen',
         !['console', 'forLoop', 'timeout', 'asyncAwait', 'promiseThen'].includes(source) &&
-        'border-border-subtle',
+            'border-border-subtle',
     )
 }
-
 
 export function getBlockBorderClass(type: BlockType): string {
     return cn(
@@ -27,10 +25,9 @@ export function getBlockBorderClass(type: BlockType): string {
         type === 'asyncAwait' && 'border-accent-asyncAwait',
         type === 'promiseThen' && 'border-accent-promiseThen',
         !['console', 'forLoop', 'timeout', 'asyncAwait', 'promiseThen'].includes(type) &&
-        'border-border-subtle',
+            'border-border-subtle',
     )
 }
-
 
 export function getBlockGlowClass(type: BlockType): string {
     return cn(
@@ -41,7 +38,6 @@ export function getBlockGlowClass(type: BlockType): string {
         type === 'promiseThen' && 'shadow-glow-promiseThen',
     )
 }
-
 
 export function getTimelineBlockClasses(type: BlockType, state: TimelineState): string {
     if (state === 'completed') {
@@ -65,14 +61,12 @@ export function getTimelineBlockClasses(type: BlockType, state: TimelineState): 
     return cn(border, glow)
 }
 
-
 export function getEngineContainerClasses(source: BlockType | undefined): string {
     if (!source) {
         return 'border-slate-700'
     }
     return getTaskBorderClasses(source)
 }
-
 
 export function getTimelineStateTextClass(state: TimelineState): string {
     return cn(
@@ -82,7 +76,6 @@ export function getTimelineStateTextClass(state: TimelineState): string {
         state === 'pending' && 'text-slate-500',
     )
 }
-
 
 export function getTimelineStateIcon(state: TimelineState): ReactNode {
     const iconClass = 'h-3 w-3'

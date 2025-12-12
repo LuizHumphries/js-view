@@ -45,9 +45,7 @@ export default function Zone({ title, variant = 'callstack', children }: ZonePro
                 </h3>
             </header>
             <LayoutGroup>
-                <div className="flex flex-1 flex-col gap-2">
-                    {children}
-                </div>
+                <div className="flex flex-1 flex-col gap-2">{children}</div>
             </LayoutGroup>
         </section>
     )

@@ -3,6 +3,7 @@ import type { ProgramBlockInstance } from '../program/types'
 import type { SimulationOp } from './ops'
 
 export function getTimeoutDelayMs(_sequence: number): number {
+    void _sequence
     return 1000
 }
 

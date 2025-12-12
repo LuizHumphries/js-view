@@ -1,169 +1,169 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  --font-display: "OpenSans", "sans-serif";
+    --font-display: 'OpenSans', 'sans-serif';
 
-  --color-bg-app: hsl(40, 20%, 5%);
-  --color-bg-panel: hsl(40, 18%, 8%);
-  --color-bg-block: hsl(40, 16%, 12%);
-  --color-bg-block-hover: hsl(40, 18%, 16%);
+    --color-bg-app: hsl(40, 20%, 5%);
+    --color-bg-panel: hsl(40, 18%, 8%);
+    --color-bg-block: hsl(40, 16%, 12%);
+    --color-bg-block-hover: hsl(40, 18%, 16%);
 
-  --color-bg-console: hsl(40, 20%, 6%);
-  --color-bg-block-strong: hsl(40, 20%, 14%);
-  --color-border-subtle: hsl(40, 25%, 18%);
+    --color-bg-console: hsl(40, 20%, 6%);
+    --color-bg-block-strong: hsl(40, 20%, 14%);
+    --color-border-subtle: hsl(40, 25%, 18%);
 
-  --color-text-primary: hsl(42, 50%, 92%);
-  --color-text-muted: hsl(40, 20%, 55%);
+    --color-text-primary: hsl(42, 50%, 92%);
+    --color-text-muted: hsl(40, 20%, 55%);
 
-  --color-accent-console: hsl(174, 60%, 55%);
-  --color-accent-forLoop: hsl(200, 65%, 58%);
-  --color-accent-timeout: hsl(25, 85%, 62%);
-  --color-accent-promiseThen: hsl(262, 80%, 72%);
-  --color-accent-asyncAwait: hsl(330, 75%, 65%);
+    --color-accent-console: hsl(174, 60%, 55%);
+    --color-accent-forLoop: hsl(200, 65%, 58%);
+    --color-accent-timeout: hsl(25, 85%, 62%);
+    --color-accent-promiseThen: hsl(262, 80%, 72%);
+    --color-accent-asyncAwait: hsl(330, 75%, 65%);
 
-  --color-accent-gold: hsl(47, 72%, 53%);
-  --color-accent-gold-hover: hsl(47, 80%, 60%);
-  --color-accent-gold-muted: hsl(47, 50%, 40%);
+    --color-accent-gold: hsl(47, 72%, 53%);
+    --color-accent-gold-hover: hsl(47, 80%, 60%);
+    --color-accent-gold-muted: hsl(47, 50%, 40%);
 
-  --color-accent-success: hsl(142, 70%, 55%);
-  --color-accent-warning: hsl(47, 85%, 55%);
-  --color-accent-danger: hsl(0, 75%, 62%);
+    --color-accent-success: hsl(142, 70%, 55%);
+    --color-accent-warning: hsl(47, 85%, 55%);
+    --color-accent-danger: hsl(0, 75%, 62%);
 
-  --color-zone-callstack: hsl(217, 80%, 65%);
-  --color-zone-microtask: hsl(280, 70%, 68%);
-  --color-zone-macrotask: hsl(32, 90%, 58%);
-  --color-zone-webapi: hsl(174, 60%, 50%);
-  --color-zone-engine: hsl(174, 60%, 50%);;
-  --color-zone-timeline: hsl(174, 60%, 50%);;
+    --color-zone-callstack: hsl(217, 80%, 65%);
+    --color-zone-microtask: hsl(280, 70%, 68%);
+    --color-zone-macrotask: hsl(32, 90%, 58%);
+    --color-zone-webapi: hsl(174, 60%, 50%);
+    --color-zone-engine: hsl(174, 60%, 50%);
+    --color-zone-timeline: hsl(174, 60%, 50%);
 
-  --shadow-card-soft: 0 4px 16px hsla(40, 30%, 4%, 0.5);
+    --shadow-card-soft: 0 4px 16px hsla(40, 30%, 4%, 0.5);
 
-  --shadow-glow-console: 0 0 12px hsla(174, 60%, 55%, 0.3);
-  --shadow-glow-forLoop: 0 0 12px hsla(200, 65%, 58%, 0.3);
-  --shadow-glow-timeout: 0 0 12px hsla(25, 85%, 62%, 0.3);
-  --shadow-glow-promiseThen: 0 0 12px hsla(262, 80%, 72%, 0.3);
-  --shadow-glow-asyncAwait: 0 0 12px hsla(330, 75%, 65%, 0.3);
-  --shadow-glow-engine: 0 0 12px hsla(330, 75%, 65%, 0.3);
+    --shadow-glow-console: 0 0 12px hsla(174, 60%, 55%, 0.3);
+    --shadow-glow-forLoop: 0 0 12px hsla(200, 65%, 58%, 0.3);
+    --shadow-glow-timeout: 0 0 12px hsla(25, 85%, 62%, 0.3);
+    --shadow-glow-promiseThen: 0 0 12px hsla(262, 80%, 72%, 0.3);
+    --shadow-glow-asyncAwait: 0 0 12px hsla(330, 75%, 65%, 0.3);
+    --shadow-glow-engine: 0 0 12px hsla(330, 75%, 65%, 0.3);
 
-  --shadow-glow-success: 0 0 14px hsla(142, 70%, 55%, 0.35);
-  --shadow-glow-warning: 0 0 14px hsla(47, 85%, 55%, 0.35);
-  --shadow-glow-danger: 0 0 14px hsla(0, 75%, 62%, 0.35);
+    --shadow-glow-success: 0 0 14px hsla(142, 70%, 55%, 0.35);
+    --shadow-glow-warning: 0 0 14px hsla(47, 85%, 55%, 0.35);
+    --shadow-glow-danger: 0 0 14px hsla(0, 75%, 62%, 0.35);
 
-  --gradient-cta: linear-gradient(135deg, hsl(48, 72%, 43%) 0%, hsl(47, 72%, 53%) 100%);
+    --gradient-cta: linear-gradient(135deg, hsl(48, 72%, 43%) 0%, hsl(47, 72%, 53%) 100%);
 }
 
 html,
 body,
 #root {
-  height: 100%;
+    height: 100%;
 }
 
 body {
-  margin: 0;
+    margin: 0;
 }
 
 .program-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: hsl(40, 30%, 25%) hsl(40, 16%, 12%);
+    scrollbar-width: thin;
+    scrollbar-color: hsl(40, 30%, 25%) hsl(40, 16%, 12%);
 }
 
 .program-scroll::-webkit-scrollbar {
-  width: 6px;
+    width: 6px;
 }
 
 .program-scroll::-webkit-scrollbar-track {
-  background: hsl(40, 16%, 12%);
-  border-radius: 9999px;
+    background: hsl(40, 16%, 12%);
+    border-radius: 9999px;
 }
 
 .program-scroll::-webkit-scrollbar-thumb {
-  background: hsl(40, 30%, 25%);
-  border-radius: 9999px;
-  border: 1px solid hsl(40, 16%, 12%);
-  transition: background 0.2s ease;
+    background: hsl(40, 30%, 25%);
+    border-radius: 9999px;
+    border: 1px solid hsl(40, 16%, 12%);
+    transition: background 0.2s ease;
 }
 
 .program-scroll::-webkit-scrollbar-thumb:hover {
-  background: hsl(47, 50%, 35%);
+    background: hsl(47, 50%, 35%);
 }
 
 @keyframes pulse-subtle {
+    0%,
+    100% {
+        opacity: 1;
+        box-shadow: 0 4px 12px hsla(48, 72%, 43%, 0.25);
+    }
 
-  0%,
-  100% {
-    opacity: 1;
-    box-shadow: 0 4px 12px hsla(48, 72%, 43%, 0.25);
-  }
-
-  50% {
-    opacity: 0.92;
-    box-shadow: 0 4px 20px hsla(47, 72%, 53%, 0.4);
-  }
+    50% {
+        opacity: 0.92;
+        box-shadow: 0 4px 20px hsla(47, 72%, 53%, 0.4);
+    }
 }
 
 .animate-pulse-subtle {
-  animation: pulse-subtle 2.5s ease-in-out infinite;
+    animation: pulse-subtle 2.5s ease-in-out infinite;
 }
 
 @keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
+    0% {
+        transform: translateX(-100%);
+    }
 
-  100% {
-    transform: translateX(100%);
-  }
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 .animate-shimmer {
-  animation: shimmer 2s ease-in-out infinite;
+    animation: shimmer 2s ease-in-out infinite;
 }
 
 @keyframes gold-shimmer {
-  0% {
-    background-position: -200% center;
-  }
+    0% {
+        background-position: -200% center;
+    }
 
-  100% {
-    background-position: 200% center;
-  }
+    100% {
+        background-position: 200% center;
+    }
 }
 
 .animate-gold-shimmer {
-  background: linear-gradient(90deg,
-      transparent 0%,
-      hsla(47, 72%, 53%, 0.12) 50%,
-      transparent 100%);
-  background-size: 200% 100%;
-  animation: gold-shimmer 3s ease-in-out infinite;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        hsla(47, 72%, 53%, 0.12) 50%,
+        transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: gold-shimmer 3s ease-in-out infinite;
 }
 
 @keyframes breathe {
+    0%,
+    100% {
+        box-shadow: 0 0 8px hsla(47, 72%, 53%, 0.15);
+    }
 
-  0%,
-  100% {
-    box-shadow: 0 0 8px hsla(47, 72%, 53%, 0.15);
-  }
-
-  50% {
-    box-shadow: 0 0 16px hsla(47, 72%, 53%, 0.3);
-  }
+    50% {
+        box-shadow: 0 0 16px hsla(47, 72%, 53%, 0.3);
+    }
 }
 
 .animate-breathe {
-  animation: breathe 3s ease-in-out infinite;
+    animation: breathe 3s ease-in-out infinite;
 }
 
 @keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
+    from {
+        transform: rotate(0deg);
+    }
 
-  to {
-    transform: rotate(360deg);
-  }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .animate-spin-slow {
-  animation: spin-slow 3s ease-in-out infinite;
+    animation: spin-slow 3s ease-in-out infinite;
 }

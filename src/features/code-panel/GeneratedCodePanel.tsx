@@ -1,4 +1,4 @@
-import { generateProgramCode } from '../../domain/program/CodeGen'
+import { generateProgramCode } from '../../domain/program/codegen'
 import { useAppSelector } from '../../store/hooks'
 import { selectBlockDefinitions } from '../blocks/blocksSlice'
 import { selectProgramBlocks } from '../program/programSlice'

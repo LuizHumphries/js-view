@@ -65,11 +65,7 @@ export function generateProgramCode(
             case 'timeout': {
                 const [msg] = messages
                 const delayMs = getTimeoutDelayMs(instance.sequence)
-                lines.push(
-                    `setTimeout(() => {`,
-                    `   console.log("${msg}");`,
-                    `}, ${delayMs});\n`,
-                )
+                lines.push(`setTimeout(() => {`, `   console.log("${msg}");`, `}, ${delayMs});\n`)
                 break
             }
         }

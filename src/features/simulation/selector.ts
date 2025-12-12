@@ -56,9 +56,15 @@ export const selectBlocksWithTimelineState = createSelector(
             if (step.activeBlockInstanceId && !waitingBlockIds.has(step.activeBlockInstanceId)) {
                 // Check if this block has any tasks still in queues
                 const hasTasksInQueues =
-                    currentStep.microTaskQueue.some(t => t.blockInstanceId === step.activeBlockInstanceId) ||
-                    currentStep.macroTaskQueue.some(t => t.blockInstanceId === step.activeBlockInstanceId) ||
-                    currentStep.webApis.some(t => t.blockInstanceId === step.activeBlockInstanceId)
+                    currentStep.microTaskQueue.some(
+                        (t) => t.blockInstanceId === step.activeBlockInstanceId,
+                    ) ||
+                    currentStep.macroTaskQueue.some(
+                        (t) => t.blockInstanceId === step.activeBlockInstanceId,
+                    ) ||
+                    currentStep.webApis.some(
+                        (t) => t.blockInstanceId === step.activeBlockInstanceId,
+                    )
 
                 if (!hasTasksInQueues) {
                     completedBlockIds.add(step.activeBlockInstanceId)

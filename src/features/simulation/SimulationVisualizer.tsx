@@ -83,8 +83,7 @@ export default function SimulationVisualizer() {
                 <p className="text-sm text-slate-300/80">
                     {programBlocks.length === 0
                         ? 'Selecione os blocos disponíveis e clique em Build para iniciar a simulação.'
-                        : currentStep?.description ??
-                          'Clique em Build para iniciar a simulação.'}
+                        : (currentStep?.description ?? 'Clique em Build para iniciar a simulação.')}
                 </p>
             </div>
 
